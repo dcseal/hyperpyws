@@ -1,2 +1,5 @@
 # Python byte code
 *pyc
+
+# Mac OS X hidden files
+.DS_Store

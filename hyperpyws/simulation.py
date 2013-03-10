@@ -177,9 +177,15 @@ def RunSimulation ( test, numr, Tout=[0] ):
     clock.advance( dt )
     
     # Real-time plots
-    if abs (clock.t-Tout[pc]) < 0.5*dt:
+    if clock.t >= Tout[pc]:
       viz.plotq_renew()
       pc += 1
       time.sleep(0.2)
+  
+  #-----------------------------------------------------------------------------
+  # Last plot
+  print ('ts = {:3d};  t = {:.3f};  dt = --'.format( clock.ts, clock.t ))
+  viz.plotq_renew()
+  time.sleep(0.2)
 
 #===============================================================================
