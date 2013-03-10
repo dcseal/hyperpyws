@@ -92,12 +92,10 @@ class MOL(object):
     
     # Index with single ghost cell on left   [--> move to preprocessing?]
     Im1 = slice( mbc-1, (mbc+mx-1)+1 )
-#    Im1 = range( mbc-1, (mbc+mx-1)+1 )
-
+    
     # Index with single ghost cell on right  [--> move to preprocessing?]
     I   = slice( mbc  , (mbc+mx  )+1 )
-#    I   = range( mbc  , (mbc+mx  )+1 )
-    
+        
     # Simple algebraic averages for now
     qs  = np.empty( meq, dtype=object )
     for m in range(meq):
@@ -112,9 +110,6 @@ class MOL(object):
     L     = self._flux.L (qs)
     alpha = max([ max(abs(a)) for a in self._flux.eig(qs) ])
     
-#    print "File 'mol.py':"
-#    print alpha # <<<<<<<<<<<<<<< DEBUG
-    
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Step 3: Project q[i+s] and f[i+s] over local characteristic variables at 
     #         location x[i], for each point x[i+s] in stencil
@@ -126,8 +121,7 @@ class MOL(object):
     # Stencils  [--> move to preprocessing?]
     extended_stencil = [ self._weno.stencil[0]-1 ] + self._weno.stencil
     S  = [ slice( mbc+sh, (mbc+mx+sh)+1 ) for sh in extended_stencil ]
-#    S  = [ range( mbc+sh, (mbc+mx+sh)+1 ) for sh in extended_stencil ]
-    
+        
     # Shift q and f according to stencil
     qq = [ Slice(q)[Si] for Si in S ]  # for now, slice on 2D array
     ff = [ Slice(f)[Si] for Si in S ]  # for now, slice on 2D array
@@ -135,12 +129,6 @@ class MOL(object):
     # Project onto characteristic variables: q -> w, f -> g
     ww = [ np.dot(L,qi) for qi in qq ]
     gg = [ np.dot(L,fi) for fi in ff ]
-    
-    
-#    print "File 'mol.py':"
-#    print ff[3] # <<<<<<<<<<<<<<< DEBUG
-#    print gg[3] # <<<<<<<<<<<<<<< DEBUG 
-#    print ''
     
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Step 4: Flux-splitting and WENO reconstruction
@@ -152,12 +140,12 @@ class MOL(object):
       # TODO: can add in an alpha[me] as well if we choose ...
       
       # Flux splitting
-      gg_m = [ 0.5*gi[m] - alpha * wi[m] for gi,wi in zip(gg[1 :],ww[1 :]) ]
-      gg_p = [ 0.5*gi[m] + alpha * wi[m] for gi,wi in zip(gg[:-1],ww[:-1]) ]
+      gg_m = [ 0.5*(gi[m]-alpha*wi[m]) for gi,wi in zip(gg[1 :],ww[1 :]) ]
+      gg_p = [ 0.5*(gi[m]+alpha*wi[m]) for gi,wi in zip(gg[:-1],ww[:-1]) ]
       
       # Weno reconstruction
-      gp = self._weno.reconstruct_left  (*gg_p)
       gm = self._weno.reconstruct_right (*gg_m)
+      gp = self._weno.reconstruct_left  (*gg_p)
       
       # Sum right and left fluxes
       ghat[m] = gp + gm
@@ -167,11 +155,6 @@ class MOL(object):
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
     fhat = np.dot(R,ghat)
-    
-#    print "File 'mol.py':"
-#    print fhat # <<<<<<<<<<<<<<< DEBUG
-#    print ghat # <<<<<<<<<<<<<<< DEBUG 
-#    print ''
     
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Step 6: Compute d/dt(q[i]) according to conservative finite-differences
@@ -213,11 +196,6 @@ class MOL(object):
     I   = slice( a  , b   )
     Ip1 = slice( a+1, b+1 )
     Ip2 = slice( a+2, b+2 )
-#    I   = np.arange(mbc, mbc+mx)
-#    Im2 = I-2
-#    Im1 = I-1
-#    Ip1 = I+1
-#    Ip2 = I+2
     
     # Compute time derivative of flux function
     ft = np.dot( self._flux.J(q), q_t )
