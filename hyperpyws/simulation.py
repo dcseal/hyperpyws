@@ -158,7 +158,7 @@ def RunSimulation ( test, numr, Tout=[0] ):
   while clock.t < test.tend and not stop:
     
     # Compute time-step based on CFL number
-    v_max = max([ max(abs(a)) for a in test.ModelEqn.eig(grid.q) ])
+    v_max = test.ModelEqn.MaxWaveSpeed( grid.q )
     dt = grid.dx / v_max * numr.CFL
     
     # Reduce last time-step if needed

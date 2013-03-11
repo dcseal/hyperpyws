@@ -65,5 +65,11 @@ class Advection1D (Flux1D):
     r[0] = np.ones (dims) * self._v
     
     return r
-
+  
+  #-----------------------------------------------------------------------------
+  def MaxWaveSpeed (self, q):
+    """ Maximum wave speed in the range of values for q. """
+    
+    return abs(self._v)
+    
 #===============================================================================  

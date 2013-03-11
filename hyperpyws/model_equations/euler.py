@@ -156,6 +156,16 @@ class Euler1D (Flux1D):
     return L
   
   #-----------------------------------------------------------------------------
+  def MaxWaveSpeed (self, q):
+    """ Maximum wave speed in the range of values for q. """
+    
+    eig  = self.eig(q)
+    vmin = min(eig[0])
+    vmax = max(eig[2])
+    
+    return max(abs(vmin),abs(vmax)) 
+    
+  #-----------------------------------------------------------------------------
   @staticmethod
   def SolidWallBC_left (q, mx, mbc):
     """ Left solid wall boundary condition, specific to 1D Euler equations. """

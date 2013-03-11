@@ -32,6 +32,10 @@ class Flux1D(object):
   def eig(self, q):
     """ Compute eigenvalues of Jacobian matrix J. """
   
+  @abstractmethod
+  def MaxWaveSpeed (self, q):
+    """ Maximum wave speed in the range of values for q. """
+  
   @property
   def meq (self):
     """ Return number of equations in model. """
