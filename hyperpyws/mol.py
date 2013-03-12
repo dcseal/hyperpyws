@@ -230,8 +230,10 @@ class MOL(object):
       [qt,qtt] - 1st and 2nd time-derivatives of solution vector q
     
     """
-    self._SetBCs(q,t)  # Apply boundary conditions 
+    self._SetBCs(q,t)        # Apply boundary conditions 
     q_t  = self.qt (q)       # Compute 1st time derivative
+
+    self._SetBCs(q_t,t)      # Apply boundary conditions (on q_t)
     q_tt = self.qtt(q, q_t)  # Compute 2nd time derivative
     
     return [q_t, q_tt]
