@@ -25,14 +25,16 @@ class RealTimeViz (object):
     # Create figures, plot numerical solution, and store dictionary
     for m in range(meq):
       
+      data = qint[m]
       fig  = plt.figure()
       ax   = fig.add_subplot(1,1,1)
-      line,= ax.plot( xint, qint[m], '.' )
+      line,= ax.plot( xint, data, '.' )
       
       ax.grid()
       ax.set_xlabel('x')
       ax.set_ylabel(self._labels[m],rotation='horizontal')
       
+      self._reset_ylim( ax, data )
       self._plots[m] = {'fig': fig, 'ax': ax, 'line': line}
     
     # Plot exact solution, if available, and store lines
@@ -68,6 +70,34 @@ class RealTimeViz (object):
     for p,qi in zip( self._plots, self._grid.qint ):
       p['line'].set_ydata( qi )
       p[  'ax'].set_title(title)
+      
+      self._reset_ylim( p['ax'], qi )
+      
       p[ 'fig'].canvas.draw()
+      
+  #-----------------------------------------------------------------------------
+  @staticmethod
+  def _reset_ylim( ax, data ):
+    """ Reset limits of y axis if data does not fit in figure 
+        or if margins are too wide.
+    """
+    # Extract y limits from axes and data, and compute theoretical margin
+    ylim   = ax.get_ylim()
+    ya,yb  = min(data), max(data)
+    margin = (yb-ya)*0.05
+    
+    # If the data limits are identical, do not do anything
+    if ya == yb:
+      return
+    
+    # Check if new y limits are needed
+    if   ya <= ylim[0] or ya-ylim[0] > 2*margin:  pass
+    elif ylim[1] <= yb or ylim[1]-yb > 2*margin:  pass
+    else                                       :  return
+    
+    # Apply margins and set new y limits
+    ya -= margin
+    yb += margin
+    ax.set_ylim( [ya,yb] )
 
 #===============================================================================
