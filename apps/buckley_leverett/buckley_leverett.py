@@ -7,7 +7,7 @@ except ImportError:  import hyperpyws_path
 # Test case: 1D Buckley-Leverett equation with square-wave ICs and periodic BCs
 #===============================================================================
 from hyperpyws.model_equations.buckley_leverett  import BuckleyLeverett1D
-from hyperpyws.boundary                          import PeriodicBCs
+from hyperpyws.boundary                          import OutflowBC_left, OutflowBC_right
 from hyperpyws.simulation                        import TestCase
 
 # FreeParameter
@@ -21,9 +21,11 @@ def q_init (x):
       q0[i] = 1.0
   return [ q0 ]
 
-# Periodic boundary conditions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
+# Boundary conditions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
 def CreateBC_func (mx, mbc):
-  SetBCs = lambda q,t : PeriodicBCs(q,mx,mbc)
+  def SetBCs(q,t):
+    OutflowBC_left (q,mx,mbc)
+    OutflowBC_right(q,mx,mbc)
   return SetBCs
 
 # Test-Case container
@@ -44,9 +46,10 @@ from hyperpyws.simulation           import Numerics
 # Numerics container
 numr         = Numerics()
 numr.weno    = Weno5_JS
-numr.stepper = rk4
-numr.CFL     = 0.5       # CFL parameter
-numr.mx      = 100       # number of mesh cells in domain
+#numr.stepper = rk4
+numr.stepper = TD_RK4
+numr.CFL     = 0.4       # CFL parameter
+numr.mx      = 160       # number of mesh cells in domain
 
 #===============================================================================
 # Real-time visualization
