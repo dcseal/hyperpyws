@@ -141,7 +141,12 @@ def RunSimulation ( test, numr, Tout=[0] ):
   
   # Initialize real-time plots
   viz.plotq_init()
-  time.sleep(0.5)
+  
+  # Give time to reposition figures if needed
+  try: input = raw_input
+  except: pass
+  print('Reposition and enlarge figures if needed. Please do not close them.')
+  input('Press Enter to start simulation ...')# compatible to Python 2.x and 3.x
   
   # Time derivatives of state vector  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
   if numr.stepper in [TD_RK4, Taylor2]:
