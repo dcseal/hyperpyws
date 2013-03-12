@@ -7,6 +7,13 @@
 # Single-derivative Runge-Kutta methods
 #===============================================================================
 
+#-------------------------------------------------------------------------------
+def fE(f,Y,t,dt):
+  """ Classical Forward Euler.
+  """
+  return Y + dt*f(Y,t)
+
+#-------------------------------------------------------------------------------
 def rk2_midpoint (f,Y,t,dt):
   """ Classical 2nd-order Runge-Kutta (midpoint rule). 
   """
