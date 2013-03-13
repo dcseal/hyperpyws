@@ -39,7 +39,7 @@ def Gp(q, fqr=0, qr=0 ):
 
     raise NotImplemented('you suck and need to implement a derivative!')
 
-def secant( qguess0, qguess1, maxiter=1e5, tol=1e-14 ):
+def secant_right( qguess0=0.4999, qguess1=0.49999, maxiter=1e5, tol=1e-14 ):
     """ Secant method for Newton iteration. 
     
     q = q - G(q) * (q-qnm1) / ( G(q) - G(qnm1) ) 
@@ -65,4 +65,44 @@ def secant( qguess0, qguess1, maxiter=1e5, tol=1e-14 ):
         qnm1 = qn
         Gnm1 = Gn
         qn   = tmp
-        
+
+def secant_left( qguess0=0.13, qguess1=0.130000001, maxiter=1e5, tol=1e-14 ):
+    """ Secant method for Newton iteration. 
+    
+    q = q - G(q) * (q-qnm1) / ( G(q) - G(qnm1) ) 
+
+    For our problem, qs = 0.13397459621556132.
+    """
+
+    # initial guesses:
+    qnm1 = qguess0;  Gnm1 = G(qnm1)
+    qn   = qguess1
+
+    qr  = 1
+    fqr = f(qr)
+
+    n_iters = 0
+    while( n_iters < maxiter ):
+
+#       print('qn = %f' % qn )
+        Gn   = G(qn, fqr, qr)
+        if( abs(Gn) < tol ):
+            return qn
+
+        # update for qn (and swap out the old q):
+        tmp = qn - Gn * (qn-qnm1) / ( Gn - Gnm1 )
+
+        # update q (and save old variable):
+        qnm1 = qn
+        Gnm1 = Gn
+        qn   = tmp
+
+def get_shock_speeds():
+
+    qs_left  = secant_left()
+    qs_right = secant_right()
+
+    print('left  value qs = %2.15e, speed = %2.15e' % (qs_left,  fp(qs_left)  ) )
+    print('right value qs = %2.15e, speed = %2.15e' % (qs_right, fp(qs_right) ) )
+
+    return( qs_left, qs_right )

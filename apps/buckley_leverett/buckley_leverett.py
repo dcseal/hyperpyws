@@ -46,9 +46,9 @@ from hyperpyws.simulation           import Numerics
 # Numerics container
 numr         = Numerics()
 numr.weno    = Weno5_JS
-#numr.stepper = rk4
-numr.stepper = TD_RK4
-numr.CFL     = 0.4       # CFL parameter
+numr.stepper = rk4
+#numr.stepper = TD_RK4
+numr.CFL     = 1.6       # CFL parameter
 numr.mx      = 400       # number of mesh cells in domain
 
 #===============================================================================
