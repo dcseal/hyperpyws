@@ -33,7 +33,7 @@ test          = TestCase()
 test.ModelEqn = BuckleyLeverett1D( M )
 test.xlims    = [-1.0, 1.0]
 test.tend     = 0.4
-test.BCs      = CreateBC_func  # better to simply say 'periodic'...
+test.BCs      = CreateBC_func
 test.qinit    = q_init
 
 #===============================================================================
@@ -49,7 +49,7 @@ numr.weno    = Weno5_JS
 #numr.stepper = rk4
 numr.stepper = TD_RK4
 numr.CFL     = 0.4       # CFL parameter
-numr.mx      = 160       # number of mesh cells in domain
+numr.mx      = 400       # number of mesh cells in domain
 
 #===============================================================================
 # Real-time visualization
