@@ -3,6 +3,9 @@
 #  qt, qtt = MOL.TimeDerivatives ( qs )
 #  return qt, qtt
 
+__all__ = ['fE', 'rk2_midpoint', 'rk2_Heun', 'rk3', 'rk3_ssp', 'rk4',
+           'Taylor2', 'TD_RK4']
+
 #===============================================================================
 # Single-derivative Runge-Kutta methods
 #===============================================================================

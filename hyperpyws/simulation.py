@@ -114,11 +114,14 @@ class Numerics (object):
 from .time_integrators  import *
 
 
-def RunSimulation ( test, numr, Tout=[0] ):
+def RunSimulation ( test, numr, Tout=[] ):
   
   # Verify input arguments
   assert(isinstance( test, TestCase ));  test.verify()
   assert(isinstance( numr, Numerics ));  numr.verify()
+  
+  if len(Tout) > 0:  PLOTS = True
+  else            :  PLOTS = False
   
   #-----------------------------------------------------------------------------
   # Create objects
@@ -133,20 +136,22 @@ def RunSimulation ( test, numr, Tout=[0] ):
                    test.BCs (numr.mx, numr.weno.mbc) )
   
   clock  = TimeManager()
-  viz    = RealTimeViz( grid, clock, test.qexact )
+  
+  if PLOTS:
+    viz = RealTimeViz( grid, clock, test.qexact )
   
   #-----------------------------------------------------------------------------
   # Set initial conditions
   grid.q = test.qinit( grid.x )
   
-  # Initialize real-time plots
-  viz.plotq_init()
-  
-  # Give time to reposition figures if needed
-  try: input = raw_input
-  except: pass
-  print('Reposition and enlarge figures if needed. Please do not close them.')
-  input('Press Enter to start simulation ...')# compatible to Python 2.x and 3.x
+  if PLOTS:
+    # Initialize real-time plots
+    viz.plotq_init()
+    # Give time to reposition figures if needed
+    try: input = raw_input
+    except: pass
+    print('Reposition and enlarge figures if needed. Please do not close them.')
+    input('Press Enter to start simulation ...')# compatible to Python 2.x and 3.x
   
   # Time derivatives of state vector  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
   if numr.stepper in [TD_RK4, Taylor2]:
@@ -172,8 +177,9 @@ def RunSimulation ( test, numr, Tout=[0] ):
       stop = True
     
     # Print information to terminal
-    print ('ts = {:3d};  t = {:.3f};  dt = {:.3e}'\
-           .format( clock.ts, clock.t, dt ))
+    if PLOTS:
+      print ('ts = {:3d};  t = {:.3f};  dt = {:.3e}'\
+             .format( clock.ts, clock.t, dt ))
       
     # Advance solution
     grid.q = numr.stepper (Fc, grid.q, clock.t, dt)
@@ -182,15 +188,21 @@ def RunSimulation ( test, numr, Tout=[0] ):
     clock.advance( dt )
     
     # Real-time plots
-    if clock.t >= Tout[pc]:
-      viz.plotq_renew()
-      pc += 1
-      time.sleep(0.2)
+    if PLOTS:
+      if clock.t >= Tout[pc]:
+        viz.plotq_renew()
+        pc += 1
+        time.sleep(0.2)
   
   #-----------------------------------------------------------------------------
   # Last plot
-  print ('ts = {:3d};  t = {:.3f};  dt = --'.format( clock.ts, clock.t ))
-  viz.plotq_renew()
-  time.sleep(0.2)
-
+  if PLOTS:
+    print ('ts = {:3d};  t = {:.3f};  dt = --'.format( clock.ts, clock.t ))
+    viz.plotq_renew()
+    time.sleep(0.2)
+  
+  #-----------------------------------------------------------------------------
+  # Return solution
+  return grid
+  
 #===============================================================================
