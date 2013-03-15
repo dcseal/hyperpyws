@@ -1,0 +1,29 @@
+# error.txt
+#
+# Column  0
+# ---------
+# mx <type 'float'>
+# Number of grix points
+#
+# Column  1
+# ---------
+# L1 <type 'float'>
+# L1 norm of error
+#
+# Column  2
+# ---------
+# L2 <type 'float'>
+# L2 norm of error
+#
+# Column  3
+# ---------
+# Li <type 'float'>
+# L-inf norm of error
+
+   50 1.628e-05 1.875e-05 3.208e-05
+  100 5.876e-07 6.638e-07 1.037e-06
+  200 2.601e-08 2.904e-08 4.103e-08
+  400 1.410e-09 1.568e-09 2.216e-09
+  800 8.451e-11 9.389e-11 1.328e-10
+ 1600 5.321e-12 5.911e-12 8.363e-12
+ 3200 4.458e-13 4.977e-13 7.120e-13
