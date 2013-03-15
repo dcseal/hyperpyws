@@ -10,7 +10,6 @@ __all__ = ['fE', 'rk2_midpoint', 'rk2_Heun', 'rk3', 'rk3_ssp', 'rk4',
 # Single-derivative Runge-Kutta methods
 #===============================================================================
 
-#-------------------------------------------------------------------------------
 def fE(f,Y,t,dt):
   """ Classical Forward Euler.
   """
@@ -79,4 +78,3 @@ def TD_RK4 (Fc, Y, t, dt):
   k2,dk2 = Fc(Ys,t)
   
   return Y + dt * ( k1 + dt/6. * (dk1 + 2.*dk2) )
-

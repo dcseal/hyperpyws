@@ -40,11 +40,6 @@ class RealTimeViz (object):
     # Plot exact solution, if available, and store lines
     if self._exact is not None:
       qex = self._exact( xint, self._clock.t )
-      
-      print "File 'visualization.py':"
-      print len(qex)
-      print len(qex[0])
-      
       for m in range(meq):
         ax = self._plots[m]['ax']
         self._plots[m]['line_ex'], = ax.plot( xint, qex[m], '-r' )

@@ -1,6 +1,6 @@
 import numpy as np
 
-try               :  import hyperpyws #weno_step
+try               :  import hyperpyws
 except ImportError:  import hyperpyws_path
 
 #===============================================================================
@@ -37,7 +37,7 @@ def DefineTestCase ():
   test.ModelEqn = Advection1D(v)
   test.xlims    = [0.0, 1.0]
   test.tend     =  1.0
-  test.BCs      = CreateBC_func  # better to simply say 'periodic'...
+  test.BCs      = CreateBC_func
   test.qinit    = q_init
   test.qexact   = q_exact
   
@@ -67,8 +67,8 @@ def parse_input():
   
   parser.add_argument('-s','--time_integrator',
                       type    = int,
-                      choices = [1,2,3,4,5,6,7,8],
-                      default =  6,
+                      choices = range(8),
+                      default =  5,
                       dest    = 'stepper',
                       metavar = 'X',
                       help    = 
