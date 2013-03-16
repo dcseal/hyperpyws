@@ -108,7 +108,7 @@ class MOL(object):
     
     R     = self._flux.R (qs)
     L     = self._flux.L (qs)
-    alpha = max([ max(abs(a)) for a in self._flux.eig(qs) ])
+    alpha = 1.1 * max([ max(abs(a)) for a in self._flux.eig(qs) ])
     
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Step 3: Project q[i+s] and f[i+s] over local characteristic variables at 
@@ -214,8 +214,9 @@ class MOL(object):
     Compute 1st and 2nd time-derivatives of solution vector:
       1. Apply boundary conditions to solution (may depend on t);
       2. Compute qt (q);
-      3. Compute qtt(q,qt);
-      4. Return [ qt, qtt].
+      3. Apply same boundary conditions to qt (<<<<< TODO <<<<<)
+      4. Compute qtt(q,qt);
+      5. Return [ qt, qtt].
     
     Parameters
     ----------
@@ -233,7 +234,7 @@ class MOL(object):
     self._SetBCs(q,t)        # Apply boundary conditions 
     q_t  = self.qt (q)       # Compute 1st time derivative
 
-    self._SetBCs(q_t,t)      # Apply boundary conditions (on q_t)
+    self._SetBCs(q_t,t)      # Apply boundary conditions (on q_t)  (<<< TODO)
     q_tt = self.qtt(q, q_t)  # Compute 2nd time derivative
     
     return [q_t, q_tt]
