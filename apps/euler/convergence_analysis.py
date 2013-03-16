@@ -17,7 +17,7 @@ def LoadData( *file_names ):
     For each file, dictionary of error norms for convergence analysis.
   
   """
-  # Import numpy function for loading .txt files, and import ordered dictionary
+  # Import numpy function for loading .dat files, and import ordered dictionary
   from numpy       import loadtxt
   from collections import OrderedDict
   
@@ -143,7 +143,7 @@ def parse_input():
   
   parser = argparse.ArgumentParser (
       prog = 'python '+ sys.argv[0],
-      description = '''Load error data from .txt files, estimate
+      description = '''Load error data from .dat files, estimate
                        convergence rates, and produce LaTeX table.''',
       formatter_class = argparse.ArgumentDefaultsHelpFormatter,
       )

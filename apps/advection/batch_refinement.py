@@ -92,11 +92,11 @@ def main():
   num_params.CFL     = args.CFL
   
   # Create file with final error in solution
-  ostream = TextDB('error.txt')
+  ostream = TextDB('error.dat')
   ostream.SetField('mx',  '5d', desc='Number of grix points')
-  ostream.SetField('L1', '.3e', desc=     'L1 norm of error')
-  ostream.SetField('L2', '.3e', desc=     'L2 norm of error')
-  ostream.SetField('Li', '.3e', desc=  'L-inf norm of error')
+  ostream.SetField('L1', '2.15e', desc=     'L1 norm of error')
+  ostream.SetField('L2', '2.15e', desc=     'L2 norm of error')
+  ostream.SetField('Li', '2.15e', desc=  'L-inf norm of error')
   ostream.open()
   
   #-----------------------------------------------------------------------------
