@@ -43,7 +43,7 @@ def DefineTestCase ():
 
   # Test-Case container
   test          = TestCase()
-  test.ModelEqn = Euler1D (gamma)
+  test.ModelEqn = Euler1D( gamma )
   test.xlims    = [0.0, 2.0]
   test.tend     =  2.0
   test.BCs      = CreateBC_func
@@ -98,6 +98,13 @@ def parse_input():
                       metavar = 'N',
                       help    = 'produce N frames as real-time visualization')
   
+  parser.add_argument('-o','--output',
+                      nargs   = '?',
+                      const   = 'final.dat',
+                      default =   None,
+                      metavar = 'FILE',
+                      help    = 'save final solution to output file' + \
+                                ' (default name: final.dat)')
   return parser.parse_args()
 
 #===============================================================================
@@ -137,8 +144,13 @@ def main():
     Tout = []
   
   # Run simulation: call default library function
-  RunSimulation( test_case, num_params, Tout )
-
+  grid = RunSimulation( test_case, num_params, Tout )
+  
+  # Store final solution to file
+  if args.output is not None:
+    data = [grid.xint] + list(grid.qint)
+    np.savetxt( args.output, np.column_stack(data) )
+  
   # Keep matplotlib windows open if necessary
   try: __IPYTHON__
   except NameError:

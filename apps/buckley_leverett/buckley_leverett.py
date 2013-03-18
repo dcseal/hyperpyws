@@ -1,77 +1,159 @@
 import numpy as np
 
-try               :  import hyperpyws #weno_step
+try               :  import hyperpyws
 except ImportError:  import hyperpyws_path
 
 #===============================================================================
-# Test case: 1D Buckley-Leverett equation with square-wave ICs and periodic BCs
-#===============================================================================
-from hyperpyws.model_equations.buckley_leverett  import BuckleyLeverett1D
-from hyperpyws.boundary                          import OutflowBC_left, OutflowBC_right
-from hyperpyws.simulation                        import TestCase
-
-# FreeParameter
-M = 1./3.
-
-# Initial conditions
-def q_init (x):
-  q0 = 0.0*x
-  for i,xi in enumerate(x):
-    if -0.5 < xi < 0.0:
-      q0[i] = 1.0
-  return [ q0 ]
-
-# Boundary conditions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
-def CreateBC_func (mx, mbc):
-  def SetBCs(q,t):
-    OutflowBC_left (q,mx,mbc)
-    OutflowBC_right(q,mx,mbc)
-  return SetBCs
-
-# Test-Case container
-test          = TestCase()
-test.ModelEqn = BuckleyLeverett1D( M )
-test.xlims    = [-1.0, 1.0]
-test.tend     = 0.4
-test.BCs      = CreateBC_func
-test.qinit    = q_init
-
-#===============================================================================
-# Choose numerical schemes and give them proper parameters
-#===============================================================================
-from hyperpyws.weno_versions.weno5  import Weno5_JS
-from hyperpyws.time_integrators     import rk3_ssp, rk4, TD_RK4
-from hyperpyws.simulation           import Numerics
-
-# Numerics container
-numr         = Numerics()
-numr.weno    = Weno5_JS
-numr.stepper = rk4
-#numr.stepper = TD_RK4
-numr.CFL     = 1.6       # CFL parameter
-numr.mx      = 400       # number of mesh cells in domain
-
-#===============================================================================
-# Real-time visualization
+# FUNCTION: Test-case setup
 #===============================================================================
 
-# Number of plots during simulation (alternatively, dT should be specified)
-nplots = 20
-
-# Time instants for creating an output
-Tout = np.linspace( 0.0, test.tend, nplots+1 )
+def DefineTestCase ():
+  """ Test case definition: 1D Buckley-Leverett equation with non-smooth 
+      initial conditions (square wave) and outflow BCs.
+  """
+  # Import modules from library
+  from hyperpyws.model_equations.buckley_leverett  import BuckleyLeverett1D
+  from hyperpyws.boundary    import OutflowBC_left, OutflowBC_right
+  from hyperpyws.simulation  import TestCase
+  
+  # Free parameter
+  M = 1./3.
+  
+  # Initial conditions
+  def q_init (x):
+    q0 = 0.0*x
+  #  q0 = 0.0*x + 0.6
+    for i,xi in enumerate(x):
+      if -0.5 < xi < 0.0:
+        q0[i] = 1.0
+    return [ q0 ]
+  
+  # Boundary conditions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
+  def CreateBC_func (mx, mbc):
+    def SetBCs(q,t):
+      OutflowBC_left (q,mx,mbc)
+      OutflowBC_right(q,mx,mbc)
+    return SetBCs
+  
+  # Test-Case container
+  test          = TestCase()
+  test.ModelEqn = BuckleyLeverett1D( M )
+  test.xlims    = [-1.0, 1.0]
+  test.tend     = 0.4
+  test.BCs      = CreateBC_func
+  test.qinit    = q_init
+  
+  return test
 
 #===============================================================================
-# Run simulation
+# FUNCTION: Parse input arguments
 #===============================================================================
-from hyperpyws.simulation import RunSimulation
 
-# Call default library function
-RunSimulation( test, numr, Tout )
+def parse_input():
+  
+  import argparse, sys
+  
+  parser = argparse.ArgumentParser (
+      prog = 'python '+ sys.argv[0],
+      description = 'Run Buckley-Leverett with square-wave ICs and outflow BCs',
+      formatter_class = argparse.RawTextHelpFormatter,
+      )
+  
+  parser.add_argument('mx',
+                      type = int,
+                      help = 'number of subdivisions along x axis')
+  
+  parser.add_argument('CFL',
+                      type = float,
+                      help = 'maximum Courant number in domain')
+  
+  parser.add_argument('-s','--time_integrator',
+                      type    = int,
+                      choices = range(8),
+                      default =  5,
+                      dest    = 'stepper',
+                      metavar = 'X',
+                      help    = 
+  '''choose integrator X for time-stepping:
+  0. FE      (forward-Euler)
+  1. RK2     (midpoint rule)
+  2. RK2-SSP (Heun's method)
+  3. RK3
+  4. RK3-SSP
+  5. RK4     (gold standard)
+  6. Taylor2 (Taylor's method, 2nd-order)
+  7. TD-RK4  (Two-derivative Runge-Kutta)
+(default: 5)''')
+  
+  parser.add_argument('-f','--frames',
+                      type    = int,
+                      default = None,
+                      metavar = 'N',
+                      help    = 'produce N frames as real-time visualization'+\
+                                ' (default: None)')
+  
+  parser.add_argument('-o','--output',
+                      nargs   = '?',
+                      const   = 'final.dat',
+                      default =   None,
+                      metavar = 'FILE',
+                      help    = 'save final solution to output file' + \
+                                ' (default name: final.dat)')
+  return parser.parse_args()
 
 #===============================================================================
-# OUTPUT
+# FUNCTION: Main script
 #===============================================================================
-import matplotlib.pyplot as plt
 
-plt.show()
+def main():
+  
+  # Parse input arguments
+  args = parse_input()
+  print(args)
+  print('')
+  
+  # Extract time-integrator function
+  import hyperpyws.time_integrators as integrators
+  stepper_name = integrators.__all__[args.stepper]
+  stepper_func = getattr( integrators, stepper_name )
+  
+  # Extract numerical parameters from input
+  from hyperpyws.weno_versions.weno5  import Weno5_JS
+  from hyperpyws.simulation           import Numerics, RunSimulation
+  
+  # Test-Case container
+  test_case = DefineTestCase()
+  
+  # Numerics container
+  num_params         = Numerics()
+  num_params.weno    = Weno5_JS       # --> should we pass a string?
+  num_params.stepper = stepper_func   # --> should we pass a string?
+  num_params.CFL     = args.CFL       # CFL parameter
+  num_params.mx      = args.mx        # number of mesh cells in domain
+  
+  # Real-time visualization: time instants for creating an output
+  if args.frames is not None:
+    Tout = np.linspace( 0.0, test_case.tend, args.frames+1 )
+  else:
+    Tout = []
+  
+  # Run simulation: call default library function
+  grid = RunSimulation( test_case, num_params, Tout )
+  
+  # Store final solution to file
+  if args.output is not None:
+    data = [grid.xint] + list(grid.qint)
+    np.savetxt( args.output, np.column_stack(data) )
+  
+  # Keep matplotlib windows open if necessary
+  try: __IPYTHON__
+  except NameError:
+    import sys
+    if not sys.flags.interactive:
+      from matplotlib.pyplot import show
+      show()
+
+#===============================================================================
+if __name__ == '__main__':
+  #Run as main program
+  main()
