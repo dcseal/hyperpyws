@@ -47,7 +47,7 @@ def DefineTestCase ():
   test          = TestCase()
   test.ModelEqn = Euler1D( gamma )
   test.xlims    = [0.0, 1.0]
-  test.tend     =  0.5
+  test.tend     =  0.2
   test.BCs      = CreateBC_func
   test.qinit    = q_init
   
