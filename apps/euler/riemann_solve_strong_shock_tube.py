@@ -68,7 +68,7 @@ def fp_K( ps, W ):
         return sqrt( A / ( ps + B ) )*( 1.0 - ( ps-p )/ (2.0*(B+ps) )  )
     else:
         # rarefaction:
-        return (1/c*rho)*( ps / p )**(-gp1/(2.0*gamma) )
+        return c/(gamma*ps) * (ps/p)**(0.5*gm1/gamma)
 
 #===============================================================================
 def f( ps ):
@@ -108,7 +108,7 @@ def NewtonSolve( f, fp, yguess, tol=1e-13, maxiter=10000 ):
 
 # TODO - THIS SECTION NEEDS TO BE MASSIVELY CLEANED UP!
 
-pstar,niters = NewtonSolve( f, fp, 19.99, tol=1e-13 )
+pstar,niters = NewtonSolve( f, fp, 1.0, tol=1e-13 )
 ustar        = 0.5*( u_l + u_r ) + 0.5*( f_K( pstar, W_r ) - f_K( pstar, W_l ) )
 
 print('    Newton iteration converged in %d iterations' % niters )
