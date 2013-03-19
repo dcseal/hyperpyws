@@ -77,15 +77,17 @@ def NewtonSolve( f, fp, yguess, tol=1e-13, maxiter=1000 ):
     raise Exception  # (<<<<< TODO - which exception should we raise? <<<< )
 
 
-# Left and right state variable.
-# These are the non-conserved quantities, defined by
-# W_K = [rho, u, press], K=l,r.
-
 # ( TODO: <<<< make these user supplied parameters to a function <<<)
-W_l = [10.0, 0, 100.0]
-W_r = [1.0 , 0,   1.0]  
+#W_l = [10.0, 0, 100.0]
+#W_r = [1.0 , 0,   1.0]  
+
+# minor variation on SOD shock tube problem:
 #W_l = [3.0, 0, 3.0]
 #W_r = [1.0, 0, 1.0]  
+
+# SOD shock tube problem:
+W_l = [1.0, 0, 1.0]  
+W_r = [0.125,0,0.1]
 
 rho_l = W_l[0]; u_l = W_l[1]; p_l = W_l[2]
 rho_r = W_r[0]; u_r = W_r[1]; p_r = W_r[2]
@@ -183,6 +185,7 @@ def LeftFan( x, t, W_l ):
 
     return [rho, u, press]
 
+#===============================================================================
 def RightFan( x, t, W_r ):
     """ Data for values inside the RightFan.
 
@@ -200,10 +203,8 @@ def RightFan( x, t, W_r ):
     return [rho, u, press]
 
 #===============================================================================
-# TODO: it would be nice to have a better naming convention, and cleaner
-# output data.
-#
-
+# Print (and compute) information to std output
+#===============================================================================
 print('Initial data:')
 print('    W_l = (%2.3f, %2.3f, %2.3f) ' % (W_l[0],W_l[1],W_l[2]) )
 print('    W_r = (%2.3f, %2.3f, %2.3f) ' % (W_r[0],W_r[1],W_r[2]) )
