@@ -11,8 +11,14 @@ from math import sqrt
 # These are the non-conserved quantities, defined by
 # W_K = [rho, u, press], K=l,r.
 
-W_l = [10.0, 0, 100.0];  rho_l = W_l[0]; u_l = W_l[1]; p_l = W_l[2]
-W_r = [1.0 , 0,   1.0];  rho_r = W_r[0]; u_r = W_r[1]; p_r = W_r[2]
+# ( TODO: <<<< make these user supplied parameters to a function <<<)
+#W_l = [10.0, 0, 100.0]
+#W_r = [1.0 , 0,   1.0]  
+W_l = [3.0, 0, 3.0]
+W_r = [1.0, 0, 1.0]  
+
+rho_l = W_l[0]; u_l = W_l[1]; p_l = W_l[2]
+rho_r = W_r[0]; u_r = W_r[1]; p_r = W_r[2]
 
 # easy access shortcut variables:
 gamma = 1.4;
@@ -35,33 +41,38 @@ def f_K( ps, W ):
     u   = W[1]
     p   = W[2]
 
-    # sound speed:
-    c = sqrt( abs( gamma*p / rho ) )
+    b = 0 # <<< ideal gas, b = 0.  co-volume gas, b \neq 0.
 
-    A = 2.0 / ( rho * gp1  * rho )
-    B = (gm1 / gp1 ) * p
+    # Data dependent constants:
+    c = sqrt( abs( gamma*p / rho ) )      # sound speed
+    A = 2.0 * (1.0 - b*rho) / ( gp1 * rho )
+    B = ( gm1 / gp1 ) * p
 
     if( ps > p ):
         # shock:
         return (ps-p) * sqrt( A / ( ps + B ) )
     else:
         # rarefaction:
-        return ( ( 2.0 * c ) / gm1 ) * ( (ps/p)**(gm1/(2.0*gamma)) - 1.0 );
+        return ((2.0*c*(1.-b*rho))/gm1) * ((ps/p)**(gm1/(2.0*gamma))-1.)
 
 #===============================================================================
 def fp_K( ps, W ):
-    """ Derivative of the function, f_K. """
+    """ Derivative of the function, f_K. 
+    
+    c.f. eqn (4.37), Toro.  
+    """
 
      # the left (or right) constant variables:
     rho = W[0]
     u   = W[1]
     p   = W[2]
 
-    # sound speed:
-    c = sqrt( abs( gamma*p / rho ) )
+    b = 0 # <<< ideal gas, b = 0.  co-volume gas, b \neq 0.
 
-    A = 2.0 / ( rho * gp1  * rho )
-    B = (gm1 / gp1 ) * p
+    # Data dependent constants:
+    c = sqrt( abs( gamma*p / rho ) )      # sound speed
+    A = 2.0 * (1.0 - b*rho) / ( gp1 * rho )
+    B = ( gm1 / gp1 ) * p
 
     if( ps > p ):
         # shock:
@@ -107,12 +118,17 @@ def NewtonSolve( f, fp, yguess, tol=1e-13, maxiter=10000 ):
 #===============================================================================
 
 # TODO - THIS SECTION NEEDS TO BE MASSIVELY CLEANED UP!
+#
+# Better naming convention, ....  better output data ...
 
-pstar,niters = NewtonSolve( f, fp, 19.99, tol=1e-13 )
+pstar,niters = NewtonSolve( f, fp, 0.5*(p_l+p_r), tol=1e-13 )
 ustar        = 0.5*( u_l + u_r ) + 0.5*( f_K( pstar, W_r ) - f_K( pstar, W_l ) )
 
 print('    Newton iteration converged in %d iterations' % niters )
 print('    p_star = %2.15e, u_star = %2.15e' % (pstar,ustar) )
+
+# ustar provides location of contact discontinuity:
+print('  speed of contact discontinuity: %2.15e ' % ustar )
 
 # information about left part:
 if( pstar > p_l ):
@@ -125,7 +141,7 @@ else:
     rho_star_l = rho_l * ( pstar / p_l )**(1./gamma)
     cs = sqrt( abs( gamma*pstar / rho_star_l ) )
 
-    c_rarefaction_left_l = u_l - c_l
+    c_rarefaction_left_l = u_l   - c_l
     c_rarefaction_left_r = ustar - cs
     print("Left foot speed: %2.15e;  Right foot speed: %2.15e" % \
         (c_rarefaction_left_l, c_rarefaction_left_r ) )
