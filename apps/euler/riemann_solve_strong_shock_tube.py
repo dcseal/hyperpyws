@@ -79,7 +79,7 @@ def fp_K( ps, W ):
         return sqrt( A / ( ps + B ) )*( 1.0 - ( ps-p )/ (2.0*(B+ps) )  )
     else:
         # rarefaction:
-        return (1/c*rho)*( ps / p )**(-gp1/(2.0*gamma) )
+        return c/(gamma*ps) * (ps/p)**(0.5*gm1/gamma)
 
 #===============================================================================
 def f( ps ):
