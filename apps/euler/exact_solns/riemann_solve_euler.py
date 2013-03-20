@@ -48,34 +48,11 @@
 #
 #===============================================================================
 
+try               :  import hyperpyws
+except ImportError:  import hyperpyws_path
+
+from hyperpyws.iterative_solvers  import NewtonSolveScalar
 from math import sqrt
-
-#===============================================================================
-# TODO - this could be inserted into a module if so desired
-#===============================================================================
-def NewtonSolve( f, fp, yguess, tol=1e-13, maxiter=1000 ):
-    """ Newton iteration to solve for f(y) = 0.
-    The user is requested to supply an initial guess, yguess, as well as the
-    derivative of the flux function fp.
-
-    This method currently only works on scalar problems.
-    """
-
-    yn   = yguess
-    fnm1 = f(yn)
-
-    n = 0
-    while( n < maxiter ):
-
-        fn = f(yn)
-        yn = yn - fn / fp( yn )
-        n += 1
-        if( abs(fn) < tol ):
-            return yn, n
-        
-    print("failed to converge;  n = %d" % n)
-    raise Exception  # (<<<<< TODO - which exception should we raise? <<<< )
-
 
 # ( TODO: <<<< make these user supplied parameters to a function <<<)
 #W_l = [10.0, 0, 100.0]
@@ -211,7 +188,7 @@ print('    W_r = (%2.3f, %2.3f, %2.3f) ' % (W_r[0],W_r[1],W_r[2]) )
 print(' ')
 
 # stupid initial guess, take the arithmetic mean for p:
-pstar,niters = NewtonSolve( f, fp, 0.5*(p_l+p_r), tol=1e-14 )
+pstar,niters = NewtonSolveScalar( f, fp, 0.5*(p_l+p_r), tol=1e-14 )
 
 # compute ustar, which is only a function of pstar:
 ustar        = 0.5*( u_l + u_r ) + 0.5*( f_K( pstar, W_r ) - f_K( pstar, W_l ) )
