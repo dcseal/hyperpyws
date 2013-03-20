@@ -108,7 +108,7 @@ class MOL(object):
     
     R     = self._flux.R (qs)
     L     = self._flux.L (qs)
-    alpha = 1.1 * max([ max(abs(a)) for a in self._flux.eig(qs) ])
+    alpha = 1.1 * self._flux.MaxWaveSpeed( qs )
     
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Step 3: Project q[i+s] and f[i+s] over local characteristic variables at 
@@ -179,6 +179,8 @@ class MOL(object):
     where f_t[i] = f'[i] * q_t[i].  q_t[i] is computed by the previous function.
     
     """
+
+    # TODO:
     # Q0: q_t as input parameter?
     # Q1: Set boundary on q_t ??
     # Q2: How to get appropriate FD approximation for given order of accuracy?
@@ -236,7 +238,7 @@ class MOL(object):
 
     self._SetBCs(q_t,t)      # Apply boundary conditions (on q_t)  (<<< TODO)
     q_tt = self.qtt(q, q_t)  # Compute 2nd time derivative
-    
+
     return [q_t, q_tt]
   
 #===============================================================================
