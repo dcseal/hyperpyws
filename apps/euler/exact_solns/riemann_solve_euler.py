@@ -202,47 +202,6 @@ def RightFan( x, t, W_r ):
  
     return [rho, u, press]
 
-class Shock( object ):
-    """ Single class representing a single shock.  
-    
-    This class is instantiated with a left and right state, which do not
-    change in time.  The other parameter is the shock speed, which also
-    doesn't change in time.
-
-    The method, find_shock, updates the location, and returns a single array
-    representing the location of the shock, and the state values on the left
-    and right hand side.  This class is intended to work well with plotting
-    routines.
-    """
-    
-    def __init__(self, s, xs, ql, qr ):
-        """ Constructor.
-
-        It's assumed that s, ql and qr do not change in time.
-
-        Parameters:
-
-            s  = speed of shock
-            xs = location of shock (in case we don't want a Riemann problem at
-                    x=0? )
-            ql = left variables
-            qr = right variables, not to be confused with variables used for
-            solving the Riemann problem!
-        """
-
-        self._s  = s
-        self._x0 = xs
-        self._ql = ql
-        self._qr = qr
-
-    def update(self, t ):
-        self._xs = self._x0 + t*s
-
-#   def get_array( self, t ):
-#       
-# TODO ??? IS THIS THE CORRECT CLASS TO DEFINE ???
-#       # self.update( t )
-
 #===============================================================================
 # Print (and compute) information to std output
 #===============================================================================
