@@ -22,12 +22,12 @@ def DefineTestCase ():
   # Initial conditions
   def q_init (x):
     
-    rho = 3.0*np.ones (x.shape)
-    u1  =     np.zeros(x.shape)
-    p   = 3.0*np.ones (x.shape)
+    rho =  10.0*np.ones (x.shape)
+    u1  =       np.zeros(x.shape)
+    p   = 100.0*np.ones (x.shape)
     
     for i,xi in enumerate(x):
-      if xi > 0.5:
+      if xi > 2.0:
         rho[i] = p[i] = 1.0
     
     eng  = p/(gamma-1.0) + 0.5*rho*u1**2
@@ -46,8 +46,8 @@ def DefineTestCase ():
   # Test-Case container
   test          = TestCase()
   test.ModelEqn = Euler1D( gamma )
-  test.xlims    = [0.0, 1.0]
-  test.tend     =  0.2
+  test.xlims    = [0.0, 5.0]
+  test.tend     =  0.4
   test.BCs      = CreateBC_func
   test.qinit    = q_init
   
