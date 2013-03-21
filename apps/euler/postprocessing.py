@@ -44,8 +44,12 @@ g = 1.4
 # NUMERICAL RESULTS
 #===============================================================================
 
-# Load axis and conserved quantities
-x, rho, mom, eng = np.loadtxt( file_name, unpack=True )
+# Open file
+with open( file_name ) as f:
+  # Read time instant
+  time = float( f.readline() )
+  # Load axis and conserved quantities
+  x, rho, mom, eng = np.loadtxt( f, unpack=True )
 
 # Compute primitive variables
 u1 = mom/rho                   # Velocity (with sign)

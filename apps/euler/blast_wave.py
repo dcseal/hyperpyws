@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 
 try               :  import hyperpyws
@@ -150,8 +152,12 @@ def main():
   
   # Store final solution to file
   if args.output is not None:
-    data = [grid.xint] + list(grid.qint)
-    np.savetxt( args.output, np.column_stack(data) )
+    time = test_case.tend
+    data = np.column_stack( [grid.xint] + list(grid.qint) )
+    fmt  = '%.15e'
+    with open( args.output, 'wb' ) as f:
+      print( fmt % time, file=f )         # time instant on first row
+      np.savetxt( f, data, fmt=fmt )      # data arrays along columns
   
   # Keep matplotlib windows open if necessary
   try: __IPYTHON__
