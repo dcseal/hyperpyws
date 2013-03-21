@@ -34,9 +34,6 @@ import matplotlib.pyplot as plt
 # Data file to be loaded
 file_name = 'final.dat'
 
-# Time instant for plots
-time = 0.2
-
 # Specific heats ratio
 g = 1.4
 
