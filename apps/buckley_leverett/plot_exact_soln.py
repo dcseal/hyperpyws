@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy             as np
 import matplotlib.pyplot as plt
 
@@ -14,8 +16,10 @@ M = 1./3.
 qs_left_problem  = 0.1339745962155613
 qs_right_problem = 0.5
 
-dt   = 0.4
-Npts = 20
+t    = 0.4
+Npts = 1000
+
+OUTFILE = None
 
 #===============================================================================
 # FLUX FUNCTION
@@ -32,11 +36,11 @@ flux = BuckleyLeverett1D( M )
 ql = np.linspace( 0.0,  qs_left_problem, Npts )
 qr = np.linspace( 1.0, qs_right_problem, Npts )
 
-left_shock  = -0.5 + dt * flux.eig([ qs_left_problem ])[0]
-fl          = -0.5 + dt * flux.eig([ ql              ])[0]
+left_shock  = t * flux.eig([ qs_left_problem  ])[0] - 0.5
+fl          = t * flux.eig([ ql               ])[0] - 0.5
 
-right_shock = dt * flux.eig([ qs_right_problem ])[0]
-fr          = dt * flux.eig([ qr               ])[0]
+right_shock = t * flux.eig([ qs_right_problem ])[0]
+fr          = t * flux.eig([ qr               ])[0]
 
 #===============================================================================
 # 2D LINE
@@ -65,6 +69,17 @@ GH =  LineSegment( G, H )
 
 # Line
 x, y = Concatenate( AB, BC, CD, DE, EF, FG, GH )
+
+#===============================================================================
+# PRINT TO FILE
+#===============================================================================
+
+if OUTFILE is not None:
+  data = np.column_stack( [x,y] )
+  fmt  = '%.15e'
+  with open( OUTFILE, 'wb' ) as f:
+    print( fmt % t, file=f )         # time instant on first row
+    np.savetxt( f, data, fmt=fmt )      # data arrays along columns
 
 #===============================================================================
 # PLOTS
