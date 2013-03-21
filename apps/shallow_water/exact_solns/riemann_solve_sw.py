@@ -39,15 +39,15 @@ flux = ShallowWater1D( g )
 #===============================================================================
 
 # Initial data (in characteristic variables):
-W_l = [1.0, 0.0   ]
-W_r = [0.1, 0.0   ]
+W_l = [3.0, 0.0   ]
+W_r = [1.0, 0.0   ]
 
 h_l = W_l[0]; u_l = W_l[1]
 h_r = W_r[0]; u_r = W_r[1]
 
-# sound speeds for left and right sides:
-c_l, c_r = flux.eig
-c_r = sqrt( abs( gamma*p_r / rho_r ) )
+#c_l, c_r = flux.eig
+c_l = h_l - sqrt( g*h_l )
+c_r = h_r + sqrt( g*h_r )
 
 #===============================================================================
 def phi_l( h ):
@@ -63,56 +63,48 @@ def phi_l( h ):
         return u_l - (h - h_l) * sqrt( 0.5*g*( 1./h + 1./h_l ) )
 
 #===============================================================================
+def phip_l( h ):
+    """ Derivative of the function, phi_l."""
+
+    if( h < h_l ):
+        return - sqrt( g/h )
+
+    else:
+        return -sqrt(2.)*g*( h*h_l + 2.*h**2 + h_l**2 ) #/ ( 4.*h_l * sqrt( g*(1./h + 1./h_l) ) * h**2 )
+
+
+#===============================================================================
 def phi_r( h ):
     """ These function calls look identical for left/right values.
 
     See section 13.10, ``Finite Volume Methods for Hyperbolic Problems",
     LeVeque.
     """
-
     if( h < h_r ):
-        return 1.0*u_r*sqrt(g*h)/h + 1.0*sqrt(g*h)/h
+        return u_r - 2.0*( sqrt(g*h_r) - sqrt(g*h) )
     else:
         return u_r + (h - h_r) * sqrt( 0.5*g*( 1./h + 1./h_r ) )
-
-#===============================================================================
-def phip_l( h ):
-    """ Derivative of the function, phi_l."""
-
-    if( h < h_l ):
-
-        # shock:
-        return sqrt( A / ( ps + B ) )*( 1.0 - ( ps-p )/ (2.0*(B+ps) )  )
-
-    else:
-
-        # this line is what is in Toro's book (c.f. eqn 4.37):
-        return 1.0 / (rho * c) * (ps/p)**(-0.5*gp1/gamma)
-
 
 #===============================================================================
 def phip_r( h ):
     """ Derivative of the function, phi_r."""
 
-    if( h < h_r ):
-
-        # shock:
-        return sqrt( A / ( ps + B ) )*( 1.0 - ( ps-p )/ (2.0*(B+ps) )  )
+    if( h < h_l ):
+        return sqrt( g/h )
 
     else:
+        return sqrt(2.)*g*( h*h_r + 2.*h**2 + h_r**2 ) / ( 4.*h_r * sqrt( g*(1./h + 1./h_r) ) * h**2 )
 
-        # this line is what is in Toro's book (c.f. eqn 4.37):
-        return 1.0 / (rho * c) * (ps/p)**(-0.5*gp1/gamma)
 
 #===============================================================================
-def phi( ps ):
+def phi( h ):
     """ hstar is found by solving phi(hstar) = 0. """
     return phi_l( h ) - phi_r( h )
 
 #===============================================================================
-def phi_p( ps ):
+def phi_p( h ):
     """ Derivative of phi from above. """
-    return 0.
+    return phip_l( h ) - phip_r( h )
 
 #===============================================================================
 def RightFan( x, t, W_r ):
@@ -123,41 +115,51 @@ def RightFan( x, t, W_r ):
 
     print("junk fan")
 
-#   rho_r = W_r[0]
-#   u_r   = W_r[1] 
+#===============================================================================
+def LeftFan( x, t, xs, W ):
+    """ Data for values inside the RightFan.
 
-#   rho   = rho_r   * ( 2/gp1 - (gm1/(c_r*gp1))*( u_r - x/t ) )**(  2/gm1);
-#   u     = 2/gm1   * ( -c_r + gm1/2 *u_r + x/t )
-#   press = press_r * ( 2/gp1 - (gm1/(c_r*gp1))*( u_r - x/t ) )**(2*gamma/gm1)
-#
-#   return [rho, u, press]
+    User is responsible for knowing correct bounds of x to supply.
+    """
+
+    u_K = W[0]
+    h_K = W[1]
+
+    A = u_K + 2.*sqrt( g*h_K )
+
+    h = 1./(9.*g)*( (u_K + 2.*sqrt(g*h_K)) - (x-xc)/t )**2
+    u = u_K - 2.*( sqrt(g*h_K) - sqrt(g*h_K) )
+    return h,u
+
 
 #===============================================================================
 # Print (and compute) information to std output
 #===============================================================================
 print('Initial data:')
-print('    W_l = (%2.3f, %2.3f, %2.3f) ' % (W_l[0],W_l[1],W_l[2]) )
-print('    W_r = (%2.3f, %2.3f, %2.3f) ' % (W_r[0],W_r[1],W_r[2]) )
+print('    W_l = (%2.3f, %2.3f) ' % (W_l[0],W_l[1] ) )
+print('    W_r = (%2.3f, %2.3f) ' % (W_r[0],W_r[1] ) )
 print(' ')
 
 # stupid initial guess, take the arithmetic mean for p:
-#pstar,niters = NewtonSolveScalar( f, fp, 0.5*(p_l+p_r), tol=1e-14 )
+hstar, niters = NewtonSolveScalar( phi, phi_p, 0.5*(h_l+h_r), tol=1e-14 )
 
-# compute ustar, which is only a function of pstar:
-#ustar        = 0.5*( u_l + u_r ) + 0.5*( f_K( pstar, W_r ) - f_K( pstar, W_l ) )
+# TODO: this is correct only in the case of a 1-rarefaction:
+# (or is it?)
+# ( eqn: (13.57), LeVeque )
+ustar = u_l + 2.*( sqrt(g*h_l) - sqrt( g*hstar ) )
 
-#Ws_l = [float('NaN'), ustar, pstar]
-#Ws_r = [float('NaN'), ustar, pstar]
+Ws = [ustar, hstar]
 
-#print('Newton solve converged in %d iterations' % niters )
-#print(' ')
-#print('Pressure and velocity inside the entire the star region:')
-#print('    p_star = %2.15e' % (pstar) )
-#print('    u_star = %2.15e' % ustar   )
-#print(' ')
+print('Newton solve converged in %d iterations' % niters )
+print(' ')
+print('    hstar = %2.15e' % hstar   )
+print('    ustar = %2.15e' % ustar   )
+print(' ')
+
+#print('ustar + sqrt(g*hstar) = %f' % (ustar + sqrt(g*hstar) ) )
 #
 ##===============================================================================
-## Leftmost characteristic (s^1)
+## Left characteristic (s^1)
 ##===============================================================================
 #if( pstar > p_l ):
 #    print("Left Shock:")
@@ -180,7 +182,7 @@ print(' ')
 #    print("    rho_star_left     = %2.15e " % rho_star_l )
 #
 ##===============================================================================
-## Rightmost characteristic (s^3)
+## Right characteristic (s^2)
 ##===============================================================================
 #if( pstar > p_r ):
 #    print("Right Shock:")

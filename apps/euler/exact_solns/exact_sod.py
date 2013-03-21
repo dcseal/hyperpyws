@@ -65,8 +65,10 @@ def LeftFan( x, t, W_l ):
     return [rho, u, press]
 
 
-time = 0.2
+t = 0.2
 Npts = 20
+
+OUTFILE = None   # ( <<< NAME OF OUTPUT FILE )
 
 #===============================================================================
 # FLUX FUNCTION
@@ -83,8 +85,8 @@ Npts = 20
 xmin = 0.
 xmax = 1.
 
-xx = np.linspace( xs+time*sll, xs+time*slr )
-rho_xx, JUNK1, JUNK2 = LeftFan( xx, time, W_l )
+xx = np.linspace( xs+t*sll, xs+t*slr )
+rho_xx, JUNK1, JUNK2 = LeftFan( xx, t, W_l )
 
 #left_shock  = -0.5 + dt * flux.eig([ qs_left_problem ])[0]
 #fl          = -0.5 + dt * flux.eig([ ql              ])[0]
@@ -100,12 +102,12 @@ from hyperpyws.geometry import Point, LineSegment, CurveSegment, Concatenate
 
 # Points
 A = Point(      xmin,         rho_l    )
-B = Point( xs+time*sll,       rho_l    )
-C = Point( xs+time*slr,       rho_sl   )
-D = Point( xs+time*u_star,    rho_sl   )
-E = Point( xs+time*u_star,    rho_sr   )
-F = Point( xs+time*s3,        rho_sr   )
-G = Point( xs+time*s3,        rho_r    )
+B = Point( xs+t*sll,       rho_l    )
+C = Point( xs+t*slr,       rho_sl   )
+D = Point( xs+t*u_star,    rho_sl   )
+E = Point( xs+t*u_star,    rho_sr   )
+F = Point( xs+t*s3,        rho_sr   )
+G = Point( xs+t*s3,        rho_r    )
 H = Point( xmax,              rho_r    )
 
 # Segments
@@ -119,6 +121,19 @@ GH =  LineSegment( G, H )
 
 # Line
 x, y = Concatenate( AB, BC, CD, DE, EF, FG, GH )
+
+#===============================================================================
+# PRINT TO FILE
+#===============================================================================
+
+
+if OUTFILE is not None:
+  data = np.column_stack( [x,y] )
+  fmt  = '%.15e'
+  with open( OUTFILE, 'wb' ) as f:
+    print( fmt % t, file=f )         # time instant on first row
+    np.savetxt( f, data, fmt=fmt )   # data arrays along columns
+
 
 #===============================================================================
 # PLOTS
