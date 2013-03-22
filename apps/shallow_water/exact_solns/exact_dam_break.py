@@ -1,3 +1,5 @@
+from __future__ import print_function   # for saving to file
+
 import numpy             as np
 import matplotlib.pyplot as plt
 
@@ -9,64 +11,61 @@ except ImportError:  import hyperpyws_path
 # INPUT DATA
 #===============================================================================
 
-# gamma, and shortcut names to common terms found here:
-gamma = 1.4
-gp1 = gamma+1.
-gm1 = gamma-1.
+# gravity
+g       = 1.0
+Npts    = 10    # number of points used use for filling in rarefaction fan.
+OUTFILE = 'exact_soln.dat'
 
 #===============================================================================
-# Riemann Data (created from riemann_solve_euler.py)
+# Riemann Data (created from riemann_solve_sw.py)
 #===============================================================================
 
-# left and right states:
-W_l = [1.,    0., 1.0]
-W_r = [0.125, 0., 0.1]
-rho_l = W_l[0]
-rho_r = W_r[0]
+# Initial data (in characteristic variables):
+W_l = [3.0, 0.0   ]
+W_r = [1.0, 0.0   ]
 
+hl = W_l[0]; ul = W_l[1]
+hr = W_r[0]; ur = W_r[1]
 
-# location of Riemann problem:
-xs = 0.5 
+# location of Riemann problem and computational domain:
+xs   = 0.5 
+xmin = 0.
+xmax = 1.
 
-# intermediate pressure and velocity:
-p_star = 3.031301780506468e-01
-u_star = 9.274526200489499e-01
+# intermediate height and velocity:
+hstar = 1.848576603096757e+00
+ustar = 7.448542169801264e-01
+
+#===============================================================================
+# Location of feet for rarefaction wave, and location of shock
+#===============================================================================
 
 # two speeds for the left rarefaction:
-sll    = -1.183215956619923e+00
-slr    = -7.027281256118334e-02
-
-# intermediate values for the density
-rho_sl = 4.263194281784952e-01
-rho_sr = 2.655737117053071e-01
+sll    =    ul - np.sqrt( g*hl ); 
+slr    = ustar - np.sqrt( g*hstar );
 
 # shock speed for right hand shock:
-s3 = 1.752155732030178e+00
+s2 = (hstar*ustar - hr*ur) / (hstar - hr );
 
 #===============================================================================
 # Data for left Rarefaction:
 #===============================================================================
-def LeftFan( x, t, W_l ):
-    """ Data in the case of a left rarefaction fan.
+def LeftFan( x, t, xs, W ):
+    """ Data for values inside the RightFan.
 
     User is responsible for knowing correct bounds of x to supply.
     """
 
-    rho_l     = W_l[0]
-    u_l       = W_l[1] 
-    press_l   = W_l[2]
+    h_K = W[0]
+    u_K = W[1]
 
-    c_l = np.sqrt( abs( gamma*press_l / rho_l ) )
+    A = u_K + 2.*np.sqrt( g*h_K )
 
-    rho   = rho_l   * ( 2./gp1 + (gm1/(c_l*gp1))*( u_l - (x-xs)/t ) )**(  2./gm1)
-    u     = 2/gm1   * ( c_l + gm1/2 *u_l + x/t )
-    press = press_l * ( 2./gp1 + (gm1/(c_l*gp1))*( u_l - (x-xs)/t ) )**(2*gamma/gm1)
+    h = 1./(9.*g)*( (u_K + 2.*np.sqrt(g*h_K)) - (x-xs)/t )**2
+    u = u_K - 2.*( np.sqrt(g*h) - np.sqrt(g*h_K) )
+    return h,u
 
-    return [rho, u, press]
-
-
-time = 0.2
-Npts = 20
+t = 0.2
 
 #===============================================================================
 # FLUX FUNCTION
@@ -74,17 +73,15 @@ Npts = 20
 
 #from hyperpyws.model_equations.euler  import Euler1D
 
-#flux = Euler1D( )
+#flux = ShallowWater1D( )
 
 #===============================================================================
 # ARRAYS
 #===============================================================================
 
-xmin = 0.
-xmax = 1.
-
-xx = np.linspace( xs+time*sll, xs+time*slr )
-rho_xx, JUNK1, JUNK2 = LeftFan( xx, time, W_l )
+# Riemann data:
+xx = np.linspace( xs+t*sll, xs+t*slr, Npts )
+h_fan, u_fan = LeftFan( xx, t, 0.5, W_l )
 
 #left_shock  = -0.5 + dt * flux.eig([ qs_left_problem ])[0]
 #fl          = -0.5 + dt * flux.eig([ ql              ])[0]
@@ -99,41 +96,87 @@ rho_xx, JUNK1, JUNK2 = LeftFan( xx, time, W_l )
 from hyperpyws.geometry import Point, LineSegment, CurveSegment, Concatenate
 
 # Points
-A = Point(      xmin,         rho_l    )
-B = Point( xs+time*sll,       rho_l    )
-C = Point( xs+time*slr,       rho_sl   )
-D = Point( xs+time*u_star,    rho_sl   )
-E = Point( xs+time*u_star,    rho_sr   )
-F = Point( xs+time*s3,        rho_sr   )
-G = Point( xs+time*s3,        rho_r    )
-H = Point( xmax,              rho_r    )
+A = Point(          xmin,       hl    )
+B = Point( xs + t*sll,       hl    )
+C = Point( xs + t*slr,       hstar )
+D = Point( xs +  t*s2,       hstar )
+E = Point( xs +  t*s2,       hr    )
+F = Point(          xmax,       hr    )
 
 # Segments
-AB =  LineSegment( A, B ) 
-BC = CurveSegment(xx, rho_xx )
-CD =  LineSegment( C, D )
-DE =  LineSegment( D, E )
-EF =  LineSegment( E, F )
-FG =  LineSegment( F, G )
-GH =  LineSegment( G, H )
+AB =  LineSegment( A, B     ) 
+BC = CurveSegment(xx, h_fan )
+CD =  LineSegment( C, D     )
+DE =  LineSegment( D, E     )
+EF =  LineSegment( E, F     )
 
 # Line
-x, y = Concatenate( AB, BC, CD, DE, EF, FG, GH )
+x, h_ex = Concatenate( AB, BC, CD, DE, EF )
+
+# Points
+A2 = Point(          xmin,       ul    )
+B2 = Point( xs + t*sll,       ul    )
+C2 = Point( xs + t*slr,       ustar )
+D2 = Point( xs +  t*s2,       ustar )
+E2 = Point( xs +  t*s2,       ur    )
+F2 = Point(          xmax,       ur    )
+
+# Segments
+AB2 =  LineSegment( A2, B2     ) 
+BC2 = CurveSegment(xx, u_fan )
+CD2 =  LineSegment( C2, D2     )
+DE2 =  LineSegment( D2, E2     )
+EF2 =  LineSegment( E2, F2     )
+
+# Line
+x, u_ex = Concatenate( AB2, BC2, CD2, DE2, EF2 )
 
 #===============================================================================
 # PLOTS
 #===============================================================================
 
-fig = plt.figure()
+# Water height
+x    = np.array( x    )
+h    = np.array( h_ex )
+fig1 = plt.figure(1)
 
-ax = fig.add_subplot(1,1,1)
-ax.plot( x, y, '.-', color='r', linewidth=2, mec='b', mfc='b' )
+ax = fig1.add_subplot(1,1,1)
+ax.plot( x, h, '.-', color='r', linewidth=2, mec='b', mfc='b' )
 ax.grid()
 ax.set_xlabel('x')
 ax.set_ylabel('q',rotation='horizontal')
 
-fig.gca().set_ylim([-0.1,1.1])
-fig.show()
+fig1.gca().set_ylim([0.9,3.1])
+fig1.show()
+
+# Momentum
+hu = np.array(u_ex)*np.array(h_ex)
+fig2 = plt.figure(2)
+
+ax = fig2.add_subplot(1,1,1)
+ax.plot( x, hu, '.-', color='r', linewidth=2, mec='b', mfc='b' )
+ax.grid()
+ax.set_xlabel('x')
+ax.set_ylabel('q',rotation='horizontal')
+
+fig2.gca().set_ylim([-0.1,1.6])
+fig2.show()
+
+#===============================================================================
+# PRINT TO FILE
+#===============================================================================
+
+if OUTFILE is not None:
+    data = np.column_stack( [x,h,hu] )
+    fmt  = '%.15e'
+    with open( OUTFILE, 'wb' ) as f:
+
+        t_str = '%.15e' % t
+        ### <<< TODO - THIS FIRST LINE CAUSES AN ERROR: <<< ###
+        #print( fmt % t, file=f )         # time instant on first row
+        print( t_str, file=f )         # time instant on first row
+        np.savetxt( f, data, fmt=fmt )   # data arrays along columns
+
 
 #===============================================================================
 # SCRIPT
