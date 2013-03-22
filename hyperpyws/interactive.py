@@ -105,6 +105,11 @@ def main( help_message, DefineTestCase ):
   # Run simulation: call default library function
   grid = RunSimulation( test_case, num_params, Tout )
   
+  # Print numerical parameters to file
+  if args.output is not None:
+    with open( 'num_params.dat', 'w' ) as f:
+      print( num_params, file=f )
+  
   # Store final solution to file
   if args.output is not None:
     time = test_case.tend

@@ -12,11 +12,11 @@ from .visualization import RealTimeViz
 # CLASS: test-case
 #===============================================================================
 
-class TestCase (object):
+class TestCase( object ):
   
   __slots__ = ['ModelEqn','xlims','BCs','qinit','qexact','tend']
   
-  def __init__(self):
+  def __init__( self ):
     
     self.ModelEqn = None
     self.xlims    = None
@@ -26,7 +26,7 @@ class TestCase (object):
     self.tend     = None
   
   #-----------------------------------------------------------------------------
-  def verify (self):
+  def verify( self ):
     """ Check that member attributes are of the proper type. """
     
     # Check if all mandatory attributes were set
@@ -76,7 +76,7 @@ class Numerics (object):
   
   __slots__ = ['weno','stepper','CFL','mx']
   
-  def __init__(self):
+  def __init__( self ):
     
     self.weno    = None
     self.stepper = None
@@ -84,7 +84,7 @@ class Numerics (object):
     self.mx      = None
   
   #-----------------------------------------------------------------------------
-  def verify (self):
+  def verify( self ):
     """ Check that member attributes are of the proper type. """
     
     # Check if all attributes were set
@@ -107,14 +107,27 @@ class Numerics (object):
     # Check 'mx'
     if self.mx <= 0:
       raise ValueError ('mx must be a positive integer number')
+  
+  #-----------------------------------------------------------------------------
+  def __repr__( self ):
+    """ String representation of the object. """
     
+    title = 'Numerical parameters'
+    line0 = '--------------------'
+    line1 = '.weno    : {}'.format( self.weno   .__name__ )
+    line2 = '.stepper : {}'.format( self.stepper.__name__ )
+    line3 = '.CFL     : {}'.format( self.CFL              )
+    line4 = '.mx      : {}'.format( self.mx               )
+    
+    return '\n'.join([ title, line0, line1, line2, line3, line4 ])
+
 #===============================================================================
 # FUNCTION: run simulation
 #===============================================================================
 from .time_integrators  import *
 
 
-def RunSimulation ( test, numr, Tout=[] ):
+def RunSimulation( test, numr, Tout=[] ):
   
   # Verify input arguments
   assert(isinstance( test, TestCase ));  test.verify()
