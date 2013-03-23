@@ -6,32 +6,21 @@ from ..flux import Flux1D
 
 #===============================================================================
 
-class BuckleyLeverett1D (Flux1D):
-  """ 1D Buckley-Leverett two-phase flow through porous media equation.
+class Burgers1D (Flux1D):
+  """ 1D Burger's equation.
   """
   _meq = 1  # number of equations in model
   
   #-----------------------------------------------------------------------------
-  def __init__ (self, M):
-    
-    self._M = M
-  
-  #-----------------------------------------------------------------------------
-  @property
-  def M (self):
-    """ Free parameter in model. """
-    
-    return self._M
+  def __init__ (self):
+    pass   
   
   #-----------------------------------------------------------------------------
   def f (self, q):
     """ Flux function f(q). """
     
-    u0   = q[0]**2
-    u1   = (1.0-q[0])**2
-    
     f    = np.empty( 1, dtype=object )  # vector
-    f[0] = u0 / (u0 + self._M*u1)
+    f[0] = 0.5 * q[0]**2
     
     return f
   
@@ -39,11 +28,8 @@ class BuckleyLeverett1D (Flux1D):
   def J (self, q):
     """ Jacobian matrix of flux function: J(q)[i,j] = ∂f[i]/∂q[j]. """
     
-    u = q[0]
-    M = self._M
-    
     J      = np.empty( (1,1), dtype=object )  # matrix
-    J[0,0] = (2.*M*u*(1.-u)) / (u**2 + M*(1.-u)**2)**2
+    J[0,0] = q[0].copy()   # TODO: better way to do this?
     
     return J
   
@@ -77,11 +63,6 @@ class BuckleyLeverett1D (Flux1D):
   #-----------------------------------------------------------------------------
   def MaxWaveSpeed (self, q):
     """ Maximum wave speed in the range of values for q. """
-    
-    u = np.linspace( min(q[0]), max(q[0]), 100 )
-    M = self._M
-    eig = (2.*M*u*(1.-u)) / (u**2 + M*(1.-u)**2)**2
-    
-    return max(abs(eig))
+    return max( max(abs(self.eig(q))) )
   
 #===============================================================================  
