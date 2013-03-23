@@ -37,7 +37,8 @@ class Euler1D (Flux1D):
     # Compute fluxes
     f = np.empty( 3, dtype=object )
     
-    f[0] = rho*u1  # should be momentum, but would pass a reference...
+    #f[0] = rho*u1  # should be momentum, but would pass a reference...
+    f[0] = mom.copy()  # is this faster? (-DS)
     f[1] = mom*u1 + p
     f[2] = (eng+p)*u1
     
