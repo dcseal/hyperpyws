@@ -4,7 +4,7 @@
 #  return qt, qtt
 
 __all__ = ['fE', 'rk2_midpoint', 'rk2_Heun', 'rk3', 'rk3_ssp', 'rk4',
-           'Taylor2', 'TD_RK4']
+           'Fehlberg5', 'Taylor2', 'TD_RK4']
 
 #===============================================================================
 # Single-derivative Runge-Kutta methods
@@ -58,6 +58,39 @@ def rk4 (f,Y,t,dt):
   k4 = f(Y+    dt*k3, t+    dt)
   return Y + (dt/6.)*( k1 + 2.0*k2 + 2.0*k3 + k4 )
 
+def Fehlberg5(f, Y, t, dt ):
+    """RK-Fehlberg 5 method. """
+
+    # butcher tableau:
+    A = [ 
+[                                                               ], 
+[      0.25                                                     ], 
+[     3./32.,       9./32.                                      ], 
+[1932./2197., -7200./2197.,  7296./2197.                        ],
+[  439./216.,          -8.,   3680./513.,   -845./4104.         ],
+[    -8./27.,           2., -3544./2565.,  1859./4104., -11./40.] ]
+  
+    # time values:
+    c = [0., 0.25, 0.375, 12./13., 1., 0.5]
+
+    k  = [ f( Y, t ) ]
+
+    for i in range(1,6):
+        ys = Y + dt* ( sum( [a*ki for (a,ki) in zip( A[i], k)] )  )
+        ts = t + dt*c[i]
+        k.append( f( ys, ts ) )
+
+    # coefficients for the fifth-order scheme:
+    b = [16./135., 0., 6656./12825., 28561./56430., -9./50., 2./55.]
+
+    # coefficients for the fourth-order scheme:
+    # ( These haven't been tested ... )
+    # bs = [25./216., 0., 1408./2565., 2197./4104., -0.2, 0.]
+
+    return Y + dt * sum( [bi*ki for (bi,ki) in zip(b,k)] )
+
+
+
 #===============================================================================
 # Two-derivative methods
 #===============================================================================
@@ -78,3 +111,5 @@ def TD_RK4 (Fc, Y, t, dt):
   k2,dk2 = Fc(Ys,t)
   
   return Y + dt * ( k1 + dt/6. * (dk1 + 2.*dk2) )
+
+
