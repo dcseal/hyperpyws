@@ -20,6 +20,13 @@ def DefineTestCase ():
     import numpy as np
     return [ 0.5*(1. + np.sin(2.0*np.pi*x) ) ]
 
+  # Spatial derivative of initial conditions 
+  # ( this derivative is needed to compute exact solution )
+  def q_init_partial_x (x):
+    import numpy as np
+    return [ np.pi*np.cos(2.0*np.pi*x) ]
+
+
   # Periodic boundary conditions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
   def CreateBC_func (mx, mbc):
     SetBCs = lambda q,t : PeriodicBCs(q,mx,mbc)
@@ -29,7 +36,7 @@ def DefineTestCase ():
   test          = TestCase()
   test.ModelEqn = Burgers1D( )
   test.xlims    = [0.0, 1.0]
-  test.tend     = 0.4
+  test.tend     = 0.25
   test.BCs      = CreateBC_func
   test.qinit    = q_init
   
