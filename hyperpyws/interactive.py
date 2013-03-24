@@ -88,11 +88,11 @@ def main( help_message, DefineTestCase ):
   stepper_func = getattr( integrators, stepper_name ) 
   
   # Extract numerical parameters from input
-  from hyperpyws.weno_versions.weno5  import Weno5_JS
+  from hyperpyws.weno_versions.weno5  import Weno5_Z
   from hyperpyws.simulation           import Numerics, RunSimulation
   
   num_params         = Numerics()     # Container for numerical parameters
-  num_params.weno    = Weno5_JS       # --> should we pass a string?
+  num_params.weno    = Weno5_Z        # << maybe we want to use Weno5(method) here, ...
   num_params.stepper = stepper_func   # --> should we pass a string?
   num_params.CFL     = args.CFL       # CFL parameter
   num_params.mx      = args.mx        # Number of mesh cells in domain
