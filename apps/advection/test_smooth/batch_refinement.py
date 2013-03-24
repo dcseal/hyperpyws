@@ -94,7 +94,7 @@ def main():
   
   # Create file with final error in solution
   ostream = TextDB('error.dat')
-  ostream.SetField('mx',  '5d', desc='Number of grix points')
+  ostream.SetField('mx',  '5d',   desc='Number of grix points')
   ostream.SetField('L1', '2.15e', desc=     'L1 norm of error')
   ostream.SetField('L2', '2.15e', desc=     'L2 norm of error')
   ostream.SetField('Li', '2.15e', desc=  'L-inf norm of error')
@@ -102,8 +102,10 @@ def main():
   
   #-----------------------------------------------------------------------------
   # Run series of simulations
-  for Nx in Nx_list:
-    
+  for n in range( len(Nx_list) ):
+
+    Nx = Nx_list[n]
+
     # Assign new number of grid cells
     num_params.mx = Nx
     
@@ -119,7 +121,23 @@ def main():
     
     # Append data to file
     ostream.write( Nx, L1, L2, Li)
-    print(' done.')
+
+    # live-feed print statements for error analysis:
+    if( n > 0 ):
+
+        # compute a ratio of the errors (copied from convergence_analysis.py)
+        LogRatio_err = np.log( L2_old / L2      )
+        LogRatio_mx  = np.log( dx_old / grid.dx )
+        order = LogRatio_err / LogRatio_mx
+        print(' done: L2-error = %2.3e; Order = %2.3f' % ( L2, order ) )
+
+    else:
+        print(' done: L2-error = %2.3e; Order = x.xxx ' % L2 )
+
+    # save the old errors for the live feed:
+    L2_old = L2
+    dx_old = grid.dx
+
   #-----------------------------------------------------------------------------
   
   # Close output file
