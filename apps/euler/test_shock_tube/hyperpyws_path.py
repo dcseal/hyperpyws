@@ -74,7 +74,7 @@ def ImportLibraryPath (LIB_NAME, MAX_DEPTH):
 
 if __file__.endswith('_path.py') or __file__.endswith('_path.pyc'):
   import os.path
-  lib_name = os.path.relpath(__file__).rpartition('_')[0]
+  lib_name = os.path.split(__file__)[1].rpartition('_')[0]
   ImportLibraryPath (lib_name, 10)
 else:
   import sys
