@@ -21,6 +21,7 @@ class Weno5_Z( WenoReconstruction ):
   """
   _stencil = [-2,-1,0,+1,+2]  # 5-point stencil
   _eps     = 1.e-12           # regularization parameter (avoids division by 0)
+  _p       = 2                # power parameter in WENO-weights
   _mbc     = 3                # required number of ghost-cells
   
   #-----------------------------------------------------------------------------
@@ -61,9 +62,10 @@ class Weno5_Z( WenoReconstruction ):
     # Get linear weights and regularization parameter
     gamma = [0.1, 0.6, 0.3]
     eps   = cls._eps
+    p     = cls._p
     
     # Compute nonlinear weights and normalize their sum to 1
-    omt  = [ g*(1. + tau5/(b+eps) ) for g,b in zip(gamma,beta) ]  # << NEW for Z
+    omt  = [ g*(1. + ( tau5/(b+eps) )**p ) for g,b in zip(gamma,beta) ]  # << NEW for Z
     omts = sum(omt)
     om   = [ o / omts for o in omt ]
     
@@ -78,5 +80,13 @@ class Weno5_Z( WenoReconstruction ):
   @classmethod
   def set_eps (cls, eps):
     cls._eps = eps
+
+  @classmethod
+  def get_p (cls):
+    return cls._p
+  
+  @classmethod
+  def set_p (cls, p):
+    cls._p = p
   
 #===============================================================================
