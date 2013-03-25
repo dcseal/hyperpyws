@@ -16,6 +16,10 @@ def parse_input():
       formatter_class=argparse.RawTextHelpFormatter
       )
   
+  parser.add_argument('input_file',
+                      metavar = 'TEST',
+                      help    = 'input file containing test-case definition')
+  
   parser.add_argument('CFL',
                       type = float,
                       help = 'maximum Courant number in domain')
@@ -77,11 +81,20 @@ def main():
   print('')
   
   #-----------------------------------------------------------------------------
-  import numpy as np
+  import os, sys, numpy as np
   
-  # Import test-case definition
-  import      euler_smooth
-  test_case = euler_smooth.DefineTestCase()
+  # Determine directory and name of input file
+  file_dir, file_name = os.path.split( args.input_file )
+  
+  # Move into test-case directory
+  origin = os.path.abspath( os.path.curdir )
+  os.chdir( file_dir )
+  
+  # Add directory to import path
+  sys.path.insert( 0, os.path.curdir )
+  
+  # Import input file as module, and create test-case object
+  test_case = __import__(file_name.rstrip('.py')).DefineTestCase()
   
   # Import path to library
   try               :  import hyperpyws
@@ -116,12 +129,12 @@ def main():
   ostreams = [ TextDB('error_q0.dat'),
                TextDB('error_q1.dat'),
                TextDB('error_q2.dat') ]
-  for os in ostreams:
-    os.SetField('mx',  '5d', desc='Number of grix points')
-    os.SetField('L1', '.3e', desc=     'L1 norm of error')
-    os.SetField('L2', '.3e', desc=     'L2 norm of error')
-    os.SetField('Li', '.3e', desc=  'L-inf norm of error')
-    os.open()
+  for f in ostreams:
+    f.SetField('mx',  '5d', desc='Number of grix points')
+    f.SetField('L1', '.3e', desc=     'L1 norm of error')
+    f.SetField('L2', '.3e', desc=     'L2 norm of error')
+    f.SetField('Li', '.3e', desc=  'L-inf norm of error')
+    f.open()
   
   #-----------------------------------------------------------------------------
   # Run series of simulations
@@ -135,7 +148,7 @@ def main():
     grid = RunSimulation( test_case, num_params )
     
     # Compute error in numerical solution, and its norms
-    for i,os in enumerate( ostreams ):
+    for i,f in enumerate( ostreams ):
       
       Err = test_case.qexact( grid.xint, test_case.tend )[i] - grid.qint[i]
       L1  = np.sum (abs (Err))   *grid.dx
@@ -143,14 +156,17 @@ def main():
       Li  = np.amax(abs (Err))
       
       # Append data to file
-      os.write( Nx, L1, L2, Li )
+      f.write( Nx, L1, L2, Li )
     
     print(' done.')
   #-----------------------------------------------------------------------------
   
   # Close output files
-  for os in ostreams:
-    os.close()
+  for f in ostreams:
+    f.close()
+  
+  # Move back to original directory
+  os.chdir( origin )
 
 #===============================================================================
 if __name__ == '__main__':

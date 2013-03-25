@@ -16,6 +16,10 @@ def parse_input():
       formatter_class=argparse.RawTextHelpFormatter
       )
   
+  parser.add_argument('input_file',
+                      metavar = 'TEST',
+                      help    = 'input file containing test-case definition')
+  
   parser.add_argument('CFL',
                       type = float,
                       help = 'maximum Courant number in domain')
@@ -77,11 +81,20 @@ def main():
   print('')
   
   #-----------------------------------------------------------------------------
-  import numpy as np
+  import os, sys, numpy as np
   
-  # Import test-case definition
-  import      advection_smooth
-  test_case = advection_smooth.DefineTestCase()
+  # Determine directory and name of input file
+  file_dir, file_name = os.path.split( args.input_file )
+  
+  # Move into test-case directory
+  origin = os.path.abspath( os.path.curdir )
+  os.chdir( file_dir )
+  
+  # Add directory to import path
+  sys.path.insert( 0, os.path.curdir )
+  
+  # Import input file as module, and create test-case object
+  test_case = __import__(file_name.rstrip('.py')).DefineTestCase()
   
   # Import path to library
   try               :  import hyperpyws
@@ -162,6 +175,9 @@ def main():
   
   # Close output file
   ostream.close()
+  
+  # Move back to original directory
+  os.chdir( origin )
 
 #===============================================================================
 if __name__ == '__main__':
