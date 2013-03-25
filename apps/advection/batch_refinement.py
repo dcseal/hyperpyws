@@ -136,9 +136,9 @@ def main():
   #-----------------------------------------------------------------------------
   # Run series of simulations
   for n in range( len(Nx_list) ):
-
+    
     Nx = Nx_list[n]
-
+    
     # Assign new number of grid cells
     num_params.mx = Nx
     
@@ -146,27 +146,31 @@ def main():
     print('Running simulation with {:5d} cells... '.format(Nx), end='')
     grid = RunSimulation( test_case, num_params )
     
-    # Compute error in numerical solution, and its norms
-    Err = test_case.qexact( grid.xint, test_case.tend )[0] - grid.qint[0]
-    L1  = np.sum (abs (Err))   *grid.dx
-    L2  = np.sqrt(sum((Err)**2)*grid.dx)
-    Li  = np.amax(abs (Err))
+    # Compute exact solution, and its norms
+    exact = test_case.qexact( grid.xint, test_case.tend )[0]
+    L1_ex = np.sum (abs ( exact ))   *grid.dx
+    L2_ex = np.sqrt(sum(( exact )**2)*grid.dx)
+    Li_ex = np.amax(abs ( exact ))
+    
+    # Compute error in numerical solution, and its (relative) norms
+    Err = exact - grid.qint[0]
+    L1  = np.sum (abs ( Err ))   *grid.dx  / L1_ex
+    L2  = np.sqrt(sum(( Err )**2)*grid.dx) / L2_ex
+    Li  = np.amax(abs ( Err ))             / Li_ex
     
     # Append data to file
     ostream.write( Nx, L1, L2, Li)
-
+    
     # live-feed print statements for error analysis:
     if( n > 0 ):
-
-        # compute a ratio of the errors (copied from convergence_analysis.py)
-        LogRatio_err = np.log( L2_old / L2      )
-        LogRatio_mx  = np.log( dx_old / grid.dx )
-        order = LogRatio_err / LogRatio_mx
-        print(' done: L2-error = %2.3e; Order = %2.3f' % ( L2, order ) )
-
+      # compute a ratio of the errors (copied from convergence_analysis.py)
+      LogRatio_err = np.log( L2_old / L2      )
+      LogRatio_mx  = np.log( dx_old / grid.dx )
+      order = LogRatio_err / LogRatio_mx
+      print(' done: L2-error = %2.3e; Order = %2.3f' % ( L2, order ) )
     else:
-        print(' done: L2-error = %2.3e; Order = x.xxx ' % L2 )
-
+      print(' done: L2-error = %2.3e; Order = x.xxx ' % L2 )
+    
     # save the old errors for the live feed:
     L2_old = L2
     dx_old = grid.dx

@@ -147,13 +147,20 @@ def main():
     print('Running simulation with {:5d} cells... '.format(Nx), end='')
     grid = RunSimulation( test_case, num_params )
     
-    # Compute error in numerical solution, and its norms
+    # Cycle over scalar equations (or state vector components)
     for i,f in enumerate( ostreams ):
       
-      Err = test_case.qexact( grid.xint, test_case.tend )[i] - grid.qint[i]
-      L1  = np.sum (abs (Err))   *grid.dx
-      L2  = np.sqrt(sum((Err)**2)*grid.dx)
-      Li  = np.amax(abs (Err))
+      # Compute exact solution, and its norms
+      exact = test_case.qexact( grid.xint, test_case.tend )[i]
+      L1_ex = np.sum (abs ( exact ))   *grid.dx
+      L2_ex = np.sqrt(sum(( exact )**2)*grid.dx)
+      Li_ex = np.amax(abs ( exact ))
+      
+      # Compute error in numerical solution, and its (relative) norms
+      Err = exact - grid.qint[i]
+      L1  = np.sum (abs (Err))   *grid.dx  / L1_ex
+      L2  = np.sqrt(sum((Err)**2)*grid.dx) / L2_ex
+      Li  = np.amax(abs (Err))             / Li_ex
       
       # Append data to file
       f.write( Nx, L1, L2, Li )
