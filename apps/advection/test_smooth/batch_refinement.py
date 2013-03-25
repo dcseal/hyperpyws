@@ -20,6 +20,23 @@ def parse_input():
                       type = float,
                       help = 'maximum Courant number in domain')
   
+  parser.add_argument('-O','--weno_order',
+                      type    = int,
+                      choices = [5,7],
+                      default =  5,
+                      help    = 'order of accuracy for WENO recontruction'+\
+                                ' (default: 5)')
+  
+  parser.add_argument('-v','--weno_version',
+                      choices = ['JS','Z','CFD'],
+                      default =  'JS',
+                      help    = 
+  '''choose WENO version:
+  JS  = WENO-JS (Jiang-Shu's algorithm)
+  Z   = WENO-Z  (Borges-Carmona-Costa-Don's algorithm)
+  CFD = central finite difference (uses WENO linear weights)
+(default: JS)''')
+  
   parser.add_argument('-s','--time_integrator',
                       type    = int,
                       choices = range(9),
@@ -73,7 +90,7 @@ def main():
   # Import modules from library
   from hyperpyws.output_utilities  import TextDB
   from hyperpyws.simulation        import Numerics, RunSimulation
-  from hyperpyws.weno_versions     import weno5
+  from hyperpyws.weno_versions     import Weno
   
   # Construct array with number of subdivisions
   logN1   = np.log10(args.range[0])
@@ -86,9 +103,12 @@ def main():
   stepper_name = integrators.__all__[args.stepper]
   stepper_func = getattr( integrators, stepper_name )
   
+  # Extract WENO reconstruction class
+  weno_class = Weno( args.weno_order, args.weno_version )
+  
   # Create container for numerical parameters
   num_params         = Numerics()
-  num_params.weno    = weno5.Weno5_JS
+  num_params.weno    = weno_class
   num_params.stepper = stepper_func
   num_params.CFL     = args.CFL
   

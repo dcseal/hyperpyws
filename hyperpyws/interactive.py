@@ -26,6 +26,23 @@ def parse_input( help_message ):
                       type = float,
                       help = 'maximum Courant number in domain')
   
+  parser.add_argument('-O','--weno_order',
+                      type    = int,
+                      choices = [5,7],
+                      default =  5,
+                      help    = 'order of accuracy for WENO recontruction'+\
+                                ' (default: 5)')
+  
+  parser.add_argument('-v','--weno_version',
+                      choices = ['JS','Z','CFD'],
+                      default =  'JS',
+                      help    = 
+  '''choose WENO version:
+  JS  = WENO-JS (Jiang-Shu's algorithm)
+  Z   = WENO-Z  (Borges-Carmona-Costa-Don's algorithm)
+  CFD = central finite difference (uses WENO linear weights)
+(default: JS)''')
+  
   parser.add_argument('-s','--time_integrator',
                       type    = int,
                       choices = range(9),
@@ -82,17 +99,20 @@ def main( help_message, DefineTestCase ):
   try               :  import hyperpyws
   except ImportError:  import hyperpyws_path
   
-  # Extract time-integrator function
   import hyperpyws.time_integrators as integrators
+  from   hyperpyws.weno_versions    import Weno
+  from   hyperpyws.simulation       import Numerics, RunSimulation
+  
+  # Extract time-integrator function
   stepper_name = integrators.__all__[args.stepper]    # --> dangerous indexing
   stepper_func = getattr( integrators, stepper_name ) 
   
-  # Extract numerical parameters from input
-  from hyperpyws.weno_versions.weno5  import Weno5_Z
-  from hyperpyws.simulation           import Numerics, RunSimulation
+  # Extract WENO reconstruction class
+  weno_class = Weno( args.weno_order, args.weno_version )
   
+  # Collect input numerical parameters
   num_params         = Numerics()     # Container for numerical parameters
-  num_params.weno    = Weno5_Z        # << maybe we want to use Weno5(method) here, ...
+  num_params.weno    = weno_class     # Weno class used for reconstructions
   num_params.stepper = stepper_func   # --> should we pass a string?
   num_params.CFL     = args.CFL       # CFL parameter
   num_params.mx      = args.mx        # Number of mesh cells in domain
