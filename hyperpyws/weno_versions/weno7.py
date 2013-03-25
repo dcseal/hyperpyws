@@ -42,7 +42,7 @@ class Weno7_BS (WenoReconstruction):
     uim3, uim2, uim1, ui, uip1, uip2, uip3 = u_stencil
 
     # we can use the reconstruct_left method, after reorganizing the stencil:
-    return cls.reconstruct_left( uim3, uim2, uim1, ui, uip1, uip2, uip3 )
+    return cls.reconstruct_left( uip3, uip2, uip1, ui, uim1, uim2, uim3 )
 
   #-----------------------------------------------------------------------------
   @classmethod
