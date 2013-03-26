@@ -38,7 +38,7 @@ def DefineTestCase ():
     z     = -0.7
     delta =  0.005
     alpha = 10.0
-    beta  = np.log(2.0)/(36*delta**2)
+    beta  = np.log10(2.0)/(36*delta**2)
     
     G = lambda xi, xc : math.exp(-beta*(xi-xc)**2)
     F = lambda xi, xc : math.sqrt(max(1.0-alpha**2*(xi-xc)**2,0.0))
