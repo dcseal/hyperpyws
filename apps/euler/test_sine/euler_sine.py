@@ -23,7 +23,7 @@ def DefineTestCase ():
   # Initial conditions
   def q_init (x):
     
-    rho = 1.0 + 0.2*np.sin(np.pi*x)
+    rho = 1.0 + 0.5*np.sin(2.0*np.pi*x)
     u1  = np.ones(x.shape)
     p   = np.ones(x.shape)
     
@@ -45,8 +45,8 @@ def DefineTestCase ():
   # Test-Case container
   test          = TestCase()
   test.ModelEqn = Euler1D( gamma )
-  test.xlims    = [0.0, 2.0]
-  test.tend     =  2.0
+  test.xlims    = [0.0, 1.0]
+  test.tend     =  1.0
   test.BCs      = CreateBC_func
   test.qinit    = q_init
   test.qexact   = q_exact
