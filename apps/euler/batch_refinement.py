@@ -85,6 +85,7 @@ def main():
   
   # Determine directory and name of input file
   file_dir, file_name = os.path.split( args.input_file )
+  file_dir = os.path.abspath( file_dir )
   
   # Move into test-case directory
   origin = os.path.abspath( os.path.curdir )
