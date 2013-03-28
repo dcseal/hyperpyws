@@ -72,7 +72,7 @@ def DefineTestCase ():
   test          = TestCase()
   test.ModelEqn = Advection1D(v)
   test.xlims    = [-1.0, 1.0]
-  test.tend     =   8.0
+  test.tend     = 8.0
   test.BCs      = CreateBC_func
   test.qinit    = q_init
   test.qexact   = q_exact
