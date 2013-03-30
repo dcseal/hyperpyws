@@ -33,15 +33,15 @@ def parse_input( help_message ):
                       help    = 'order of accuracy for WENO recontruction'+\
                                 ' (default: 5)')
   
-  parser.add_argument('-v','--weno_version',
+  parser.add_argument('-w','--weno_version',
                       choices = ['JS','Z','CFD'],
-                      default =  'JS',
+                      default =  'Z',
                       help    = 
   '''choose WENO version:
   JS  = WENO-JS (Jiang-Shu's algorithm)
   Z   = WENO-Z  (Borges-Carmona-Costa-Don's algorithm)
   CFD = central finite difference (uses WENO linear weights)
-(default: JS)''')
+(default: Z)''')
   
   parser.add_argument('-s','--time_integrator',
                       type    = int,
@@ -68,6 +68,13 @@ def parse_input( help_message ):
                       metavar = 'N',
                       help    = 'produce N frames as real-time visualization'+\
                                 ' (default: None)')
+
+  parser.add_argument('-v','--verbosity',
+                      type    = bool,
+                      default = False,
+                      metavar = 'V',
+                      help    = 'if( V ), turn on verbose output to screen.'
+                                ' (default: False)')
   
   parser.add_argument('-o','--output',
                       nargs   = '?',
@@ -124,7 +131,7 @@ def main( help_message, DefineTestCase ):
     Tout = []
   
   # Run simulation: call default library function
-  grid = RunSimulation( test_case, num_params, Tout )
+  grid = RunSimulation( test_case, num_params, Tout, args.verbosity )
   
   # Print numerical parameters to file
   if args.output is not None:

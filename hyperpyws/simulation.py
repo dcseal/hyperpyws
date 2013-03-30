@@ -127,7 +127,7 @@ class Numerics (object):
 from .time_integrators  import *
 
 
-def RunSimulation( test, numr, Tout=[] ):
+def RunSimulation( test, numr, Tout=[], verbosity=False ):
   
   # Verify input arguments
   assert(isinstance( test, TestCase ));  test.verify()
@@ -190,8 +190,8 @@ def RunSimulation( test, numr, Tout=[] ):
       stop = True
     
     # Print information to terminal
-    if PLOTS:
-      print ('ts = {:3d};  t = {:.3f};  dt = {:.3e}'\
+    if(PLOTS and verbosity):
+      print ('ts (time step number) = {:3d};  t = {:.3f};  dt = {:.3e}'\
              .format( clock.ts, clock.t, dt ))
       
     # Advance solution
@@ -205,12 +205,13 @@ def RunSimulation( test, numr, Tout=[] ):
       if clock.t >= Tout[pc]:
         viz.plotq_renew()
         pc += 1
-        time.sleep(0.2)
+        #time.sleep(0.2)
   
   #-----------------------------------------------------------------------------
   # Last plot
   if PLOTS:
-    print ('ts = {:3d};  t = {:.3f};  dt = --'.format( clock.ts, clock.t ))
+    print('Final plot:' +
+          'ts (time step number) = {:3d};  t = {:.3f};  dt = --'.format( clock.ts, clock.t ))
     viz.plotq_renew()
     time.sleep(0.2)
   
