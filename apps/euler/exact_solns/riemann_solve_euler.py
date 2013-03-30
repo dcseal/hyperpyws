@@ -54,25 +54,43 @@ except ImportError:  import hyperpyws_path
 from hyperpyws.iterative_solvers  import NewtonSolveScalar
 from math import sqrt
 
-# ( TODO: <<<< make these user supplied parameters to a function <<<)
-#W_l = [10.0, 0, 100.0]
-#W_r = [1.0 , 0,   1.0]  
-
-# minor variation on SOD shock tube problem:
-#W_l = [3.0, 0, 3.0]
-#W_r = [1.0, 0, 1.0]  
-
-# SOD shock tube problem:
-W_l = [1.0, 0, 1.0]  
-W_r = [0.125,0,0.1]
-
-rho_l = W_l[0]; u_l = W_l[1]; p_l = W_l[2]
-rho_r = W_r[0]; u_r = W_r[1]; p_r = W_r[2]
-
 # easy access shortcut variables:
 gamma = 1.4;
 gm1   = gamma-1.;
 gp1   = gamma+1.;
+
+def ConvertQtoW( Q ):
+    """ Convert conserved quantities to characteristic quantities. """
+    rho, m, E = Q
+    u = m / rho
+    p = gm1*( E - 0.5*rho*u**2 )
+    return [rho, u, p ]
+
+
+# (half of Woodward Colella blast wave problem)
+#W_l = [10.0, 0, 100.0]
+#W_r = [1.0 , 0,   1.0]  
+
+# minor variation on SOD shock tube problem (see LeVeque)
+#W_l = [3.0, 0, 3.0]
+#W_r = [1.0, 0, 1.0]  
+
+# SOD shock tube problem (see 1978 paper):
+#W_l = [1.0, 0, 1.0]  
+#W_r = [0.125,0,0.1]
+
+# "Lax" problem, really it's Harten's problem, and now it's our problem to deal
+# with Harten's problem
+
+# conserved quantitites:
+Q_l = [0.445, 0.3111, 8.928  ]
+Q_r = [0.5  , 0.0   , 1.4275 ]
+
+W_l = ConvertQtoW( Q_l )
+W_r = ConvertQtoW( Q_r )
+
+rho_l = W_l[0]; u_l = W_l[1]; p_l = W_l[2]
+rho_r = W_r[0]; u_r = W_r[1]; p_r = W_r[2]
 
 # sound speeds for left and right sides:
 c_l = sqrt( abs( gamma*p_l / rho_l ) )
