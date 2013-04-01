@@ -31,15 +31,15 @@ def parse_input():
                       help    = 'order of accuracy for WENO recontruction'+\
                                 ' (default: 5)')
   
-  parser.add_argument('-v','--weno_version',
+  parser.add_argument('-w','--weno_version',
                       choices = ['JS','Z','CFD'],
-                      default =  'JS',
+                      default =  'Z',
                       help    = 
   '''choose WENO version:
   JS  = WENO-JS (Jiang-Shu's algorithm)
   Z   = WENO-Z  (Borges-Carmona-Costa-Don's algorithm)
   CFD = central finite difference (uses WENO linear weights)
-(default: JS)''')
+(default: Z)''')
   
   parser.add_argument('-s','--time_integrator',
                       type    = int,
