@@ -95,13 +95,17 @@ h_fan, u_fan = LeftFan( xx, t, 0.5, W_l )
 
 from hyperpyws.geometry import Point, LineSegment, CurveSegment, Concatenate
 
+#----------------#
+# Exact Height   #
+#----------------#
+
 # Points
-A = Point(          xmin,       hl    )
+A = Point(       xmin,       hl    )
 B = Point( xs + t*sll,       hl    )
 C = Point( xs + t*slr,       hstar )
 D = Point( xs +  t*s2,       hstar )
 E = Point( xs +  t*s2,       hr    )
-F = Point(          xmax,       hr    )
+F = Point(       xmax,       hr    )
 
 # Segments
 AB =  LineSegment( A, B     ) 
@@ -110,25 +114,29 @@ CD =  LineSegment( C, D     )
 DE =  LineSegment( D, E     )
 EF =  LineSegment( E, F     )
 
-# Line
+# exact height:
 x, h_ex = Concatenate( AB, BC, CD, DE, EF )
 
+#----------------#
+# Exact Velocity
+#----------------#
+
 # Points
-A2 = Point(          xmin,       ul    )
+A2 = Point(       xmin,       ul    )
 B2 = Point( xs + t*sll,       ul    )
 C2 = Point( xs + t*slr,       ustar )
 D2 = Point( xs +  t*s2,       ustar )
 E2 = Point( xs +  t*s2,       ur    )
-F2 = Point(          xmax,       ur    )
+F2 = Point(       xmax,       ur    )
 
 # Segments
 AB2 =  LineSegment( A2, B2     ) 
-BC2 = CurveSegment(xx, u_fan )
+BC2 = CurveSegment( xx, u_fan  )
 CD2 =  LineSegment( C2, D2     )
 DE2 =  LineSegment( D2, E2     )
 EF2 =  LineSegment( E2, F2     )
 
-# Line
+# exact velocity
 x, u_ex = Concatenate( AB2, BC2, CD2, DE2, EF2 )
 
 #===============================================================================
@@ -150,7 +158,7 @@ fig1.gca().set_ylim([0.9,3.1])
 fig1.show()
 
 # Momentum
-hu = np.array(u_ex)*np.array(h_ex)
+hu   = np.array(u_ex)*np.array(h_ex)
 fig2 = plt.figure(2)
 
 ax = fig2.add_subplot(1,1,1)
