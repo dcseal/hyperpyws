@@ -36,16 +36,18 @@ def DefineTestCase ():
 #   q    = np.empty( 3, dtype=object )
 #   q[:] = [ rho, rho*u1, eng ]
 
-## Ridiculous "Lax" shock-tube problem:
+    # Ridiculous "Lax" shock-tube problem (ICs due to Harten):
     rho =  0.445  * np.ones(x.shape)
-    m   =  0.3111 * np.ones(x.shape)
-    E   =  8.928  * np.ones(x.shape)
-    
+    m   =  0.3111 * np.ones(x.shape)    # u = 0.6991011235955056
+    E   =  8.928  * np.ones(x.shape)    # p = 3.5277019280898867
+   
     for i,xi in enumerate(x):
       if xi > 0.5:
         rho[i] = 0.5
-        m  [i] = 0.
-        E  [i] = 1.4275
+        m  [i] = 0.                     # u = 0.0
+        E  [i] = 1.4275                 # p = 0.5708
+
+    # note that these give the following 
     q    = np.empty( 3, dtype=object )
     q[:] = [ rho, m, E ]
     
