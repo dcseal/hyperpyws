@@ -28,10 +28,14 @@ Running a simulation
 [2] Run the application.  The -h flag provides a list of options that are
 available.
 
-For example, here is an example of a run inside the Python interpreter:
+In order to see the results of your simulation, you need to specify the -f
+flag indicating the number of frames you desire.
 
-#>> cd /path/to/hyperpyws/apps/burgers/test_sine_to_n
-#>> run  sin_to_n.py -h
-#usage: python sine_to_n.py [-h] [-O {5,7}] [-w {JS,Z,CFD}] [-s X] [-f N] [-v V] [-o [FILE]] mx CFL
-#>> run sin_to_n.py 100 0.4
+For example, here is an example of a single run of Burger's equation using 
+mx=100 points, and a CFL of 0.8:
 
+~$ cd $HYPERPYWS/apps/burgers/test_sine_to_n
+~$ pythong test_sine_to_n.py -h
+usage: python sine_to_n.py [-h] [-O {5,7}] [-w {JS,Z,CFD}] [-s X] [-f N] [-v V] [-o [FILE]] mx CFL
+...
+~$ python sin_to_n.py 100 0.8 -f 10
