@@ -68,7 +68,7 @@ def parse_input( help_message ):
   
   parser.add_argument('-s','--time_integrator',
                       type    = int,
-                      choices = range(9),
+                      choices = range(11),
                       default =  5,
                       dest    = 'stepper',
                       metavar = 'X',
@@ -82,7 +82,9 @@ def parse_input( help_message ):
   5. RK4     (gold standard)
   6. Fehlberg5 (from the 4-5 pair)
   7. Taylor2 (Taylor's method, 2nd-order)
-  8. TD-RK4  (Two-derivative Runge-Kutta)
+  8. TD-RK3  (Two-derivative Runge-Kutta, 3rd-order)
+  9. TD-RK4  (Two-derivative Runge-Kutta, 4th-order)
+ 10. TD-RK5  (Two-derivative Runge-Kutta, 5th-order)
 (default: 5)''')
   
   parser.add_argument('-f','--frames',

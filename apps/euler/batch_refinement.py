@@ -68,7 +68,7 @@ def parse_input():
   
   parser.add_argument('-s','--time_integrator',
                       type    = int,
-                      choices = range(9),
+                      choices = range(11),
                       default =  5,
                       dest    = 'stepper',
                       metavar = 'X',
@@ -82,7 +82,9 @@ def parse_input():
   5. RK4     (gold standard)
   6. Fehlberg5 (from the 4-5 pair)
   7. Taylor2 (Taylor's method, 2nd-order)
-  8. TD-RK4  (Two-derivative Runge-Kutta)
+  8. TD-RK3  (Two-derivative Runge-Kutta, 3rd order)
+  9. TD-RK4  (Two-derivative Runge-Kutta, 4th order)
+ 10. TD-RK5  (Two-derivative Runge-Kutta, 5th order)
 (default: 5)''')
   
   parser.add_argument('-r','--range',
@@ -164,8 +166,10 @@ def main():
   
   #-----------------------------------------------------------------------------
   # Run series of simulations
-  for Nx in Nx_list:
+  for n in range( len(Nx_list) ):
     
+    Nx = Nx_list[n]
+
     # Assign new number of grid cells
     num_params.mx = Nx
     
@@ -190,14 +194,30 @@ def main():
       
       # Append data to file
       f.write( Nx, L1, L2, Li )
+
+      # live-feed print statements for error analysis:
+      if( i == 0 ):
+          if( n > 0 ):
+            # compute a ratio of the errors (copied from convergence_analysis.py)
+            LogRatio_err = np.log( L2_old / L2      )
+            LogRatio_mx  = np.log( dx_old / grid.dx )
+            order = LogRatio_err / LogRatio_mx
+            print(' done: L2-error (in density) = %2.3e; Order = %2.3f' % ( L2, order ) )
+          else:
+            print(' done: L2-error (in density) = %2.3e; Order = x.xxx ' % L2 )
     
-    print(' done.')
+          # save the old errors for the live feed:
+          L2_old = L2
+          dx_old = grid.dx
+       
+  print(' done.')
   #-----------------------------------------------------------------------------
   
   # Close output files
   for f in ostreams:
     f.close()
-  
+
+
   # Move back to original directory
   os.chdir( origin )
 

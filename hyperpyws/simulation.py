@@ -190,7 +190,7 @@ def RunSimulation( test, numr, Tout=[], verbosity=False ):
     input('Press Enter to start simulation ...')# compatible to Python 2.x and 3.x
   
   # Time derivatives of state vector  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  (FIX ME)
-  if numr.stepper in [TD_RK4, Taylor2]:
+  if numr.stepper in [TD_RK3, TD_RK4, TD_RK5, Taylor2]:
     Fc = solver.TimeDerivatives  # multi-deriv. integrator
   else:
     Fc = lambda q,t : solver.TimeDerivatives(q,t)[0]

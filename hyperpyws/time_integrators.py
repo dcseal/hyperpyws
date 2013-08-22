@@ -27,7 +27,7 @@
 #  return qt, qtt
 
 __all__ = ['fE', 'rk2_midpoint', 'rk2_Heun', 'rk3', 'rk3_ssp', 'rk4',
-           'Fehlberg5', 'Taylor2', 'TD_RK4']
+           'Fehlberg5', 'Taylor2', 'TD_RK3', 'TD_RK4', 'TD_RK5']
 
 #===============================================================================
 # Single-derivative Runge-Kutta methods
@@ -126,6 +126,17 @@ def Taylor2 (Fc, Y, t, dt):
   return Y + dt * ( k1 + (0.5*dt)* dk1 )
 
 #-------------------------------------------------------------------------------
+def TD_RK3 (Fc, Y, t, dt):
+  """ Two-Derivative, 3rd-order Runge-Kutta method.
+  """
+
+  k1,dk1 = Fc(Y, t)
+  Ys     = Y + (dt) * ( k1 + (0.5*dt)* dk1 )
+  k2,dk2 = Fc(Ys,t+1.0*dt)
+  
+  return Y + dt * ( (2.*k1+k2)/3. + dt/6. * (dk1) )
+
+#-------------------------------------------------------------------------------
 def TD_RK4 (Fc, Y, t, dt):
   """ Two-Derivative, 4th-order Runge-Kutta method.
   """
@@ -134,5 +145,24 @@ def TD_RK4 (Fc, Y, t, dt):
   k2,dk2 = Fc(Ys,t+0.5*dt)
   
   return Y + dt * ( k1 + dt/6. * (dk1 + 2.*dk2) )
+
+#-------------------------------------------------------------------------------
+def TD_RK5 (Fc, Y, t, dt):
+  """ Two-Derivative, 4th-order Runge-Kutta method.
+  """
+
+  # First stage:
+  k1,dk1 = Fc(Y, t)
+
+  # Second stage:
+  Y2     = Y + (0.2*dt) * ( k1 + (0.1*dt)* dk1 )
+  k2,dk2 = Fc(Y2,t+0.2*dt)
+
+  # Third stage:
+  Y3     = Y + dt * ( (2./3.)*k1 + dt/27. * ((7.*dk2 - dk1) ) )
+  k3,dk3 = Fc(Y3, t+(2./3.)*dt)
+
+  # Final update:
+  return Y + dt * ( k1 + dt * (dk1/24. + 25./84.*dk2 + 9./56.*dk3) )
 
 
