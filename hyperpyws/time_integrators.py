@@ -148,21 +148,96 @@ def TD_RK4 (Fc, Y, t, dt):
 
 #-------------------------------------------------------------------------------
 def TD_RK5 (Fc, Y, t, dt):
-  """ Two-Derivative, 4th-order Runge-Kutta method.
+  """ Two-Derivative, 5th-order Runge-Kutta method.
   """
+
+  # Single parameter family defined by c3:
+  c3 = 1.0
+  #c3 = .8    # << this value should be unstable <<
+
+  # Remaining coefficients are defined by c3
+  bs1 = (10.*c3**2-8.*c3+1.)/(12.*c3*(5.*c3-3.))
+  bs2 = (25.*(2.*c3-1.)**3)  /(12.*(5.*c3-3.)*(10.*c3**2-10.*c3+3.))
+  bs3 = 1./(12.*c3*(10.*c3**2-10.*c3+3.))
+  c2  = (5.*c3-3.)/(5.*(2.*c3-1.))
+
+  a32 = (c3*(2.*c3-1.)*(10.*c3**2-10.*c3+3.))/(2.*(5.*c3-3.))
+  a31 = 0.5*c3**2 - a32
+  a21 = 0.5*c2**2
 
   # First stage:
   k1,dk1 = Fc(Y, t)
 
   # Second stage:
-  Y2     = Y + (0.2*dt) * ( k1 + (0.1*dt)* dk1 )
-  k2,dk2 = Fc(Y2,t+0.2*dt)
+  Y2     = Y + c2*dt*k1 + (a21*dt**2)*dk1
+  k2,dk2 = Fc(Y2,t+c2*dt)
 
   # Third stage:
-  Y3     = Y + dt * ( (2./3.)*k1 + dt/27. * ((7.*dk2 - dk1) ) )
-  k3,dk3 = Fc(Y3, t+(2./3.)*dt)
+  Y3     = Y + dt*c3*k1 + dt**2*( a31*dk1+a32*dk2 )
+  k3,dk3 = Fc(Y3, t + c3*dt)
 
   # Final update:
-  return Y + dt * ( k1 + dt * (dk1/24. + 25./84.*dk2 + 9./56.*dk3) )
+  return Y + dt * ( k1 + dt * (bs1*dk1 + bs2*dk2 + bs3*dk3) )
+
+#===============================================================================
+# Low-storage SSP methods
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+#def ssp10_4(F, Y, t, dt):
+# """ Fourth-order, ten stage method.
+
+# This is a low-storage, optimal SSP(10,4) method.  
+
+# See: "Highly efficient strong stability-preserving Runge-Kutta methods with 
+#        low-storage implementations", Ketcheson, (2008).
+
+# for further details.
 
 
+# In particular, we follow the low-storage implementation
+# suggested in Pseudocode 3.  There's a single "stage" that
+# reassigns each register with a linear combination of the
+# two registers being used.
+# """
+
+# def AdvanceTimeStage( alpha1, q, alpha2, qnew, beta_dt, L ):
+#   
+#   qnew = alpha1*q    + alpha2*qnew + beta_dt*L
+#   t    = alpha1*told + alpha2*tnew + beta_dt
+
+#   return qnew
+
+# def AdvanceTimeStage4( told, qold, q1, q2 ):
+#   """See 'Pseudocode 3.' in "Highly efficient strong stability-preserving
+#      Runge-Kutta methods with low-storage implementations", (2008)."""
+
+#   # time advance:
+#   #   t2 = (told + 9.0*t1)*(1./25.);
+#   #   t1 = 15.0*t2 - 5.0*t1;          # i.e., t1 = .6*told+.4*t1
+
+#   q2 = (qold + 9.0*q1)/(25.0)
+#   q1 = 15.0*q2 - 5.0*q1
+
+#   return (q1,q2)
+
+# # coefficients defining the method:
+# alpha1 = np.ones(10)
+# alpha2 = np.zeros(10);          alpha2[9] = 3.0/5.0
+# beta   = 1.0/6.0*np.ones(10);   beta  [9] = 0.1
+
+# def AdvanceTimeStage( alpha1, q, alpha2, qnew, beta_dt, L ):
+
+# <<< TODO : finish writing the small section <<<
+
+# for n in range(5):
+#   (q1,q2) = AdvanceTimeStage( alpha1[n], q1, alpha2[n], q1, dt*beta[n], f(q1,t) )
+
+# (q1,q2) = AdvanceTimeStage4( dt, Y, q1, q2 )
+
+# for n in range(5,9):
+#   (q1,q2) = AdvanceTimeStage( alpha1[n], q1, alpha2[n], q2, dt*beta[n], f(q1,t) )
+
+# (q1,q2) = AdvanceTimeStage( alpha1[n], q1, alpha2[n], q2, dt*beta[n], f(q1,t) )
+
+# return Y + dt*k2
