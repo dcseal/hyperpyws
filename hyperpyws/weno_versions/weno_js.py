@@ -24,6 +24,12 @@ from ..weno import WenoReconstruction
 #
 #   See: G.-S. Jiang and C.-W. Shu, "Efficient Implementation of Weighted ENO 
 #        Schemes". J. Comput. Phys. 126 (1996), pp. 202-228. 
+#
+#   or Section 2.2 of the recent review paper:
+#
+#        C.-W. Shu, "High Order Weighted Essentially Nonoscillatory Schemes for
+#                    Convection Dominated Problems", SIAM Review, Vol. 51, 
+#                    No. 1, pp 82--126, 2009.
 #===============================================================================
 
 class Weno5_JS( WenoReconstruction ):
